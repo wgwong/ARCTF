@@ -1,0 +1,64 @@
+
+
+player id - (identify phones)
+//prob player object
+	//with member fields id, team, location, etc.
+
+store location of every player currently connected
+	store an array of locations for EACH player (to handle jumping)
+
+CAP players to like x per game
+
+send location of everyone to phone (every x time interval)
+
+
+
+handle disconnects:
+	every phone connected has to send location, sesskey, id every 5 seconds
+	if server doesnt receive this "heartbeat" from a phone more than 3 times, then it pronounces the phone as "disconnected" and handles all server stuff accordingly and then sends the update to that d/c phone's team
+
+	if phone still receives game data from server:
+		phone should see that it 
+
+
+
+phone creates lobby, connects to server to create a lobby, sends phone id, loc
+server returns lobby sess key to phone as well as indicating that the phone is the owner
+	so returns lobby sess key, and var owner: phone id that indicates which phone is owner
+
+other phones connect to server looking for a lobby, server returns list of nearby lobbies
+phones choose a lobby to connect to, upon button press, connects to that lobby, sends phone id, loc
+server returns lobby sess key
+each time server receives a new connection from a non-owner phone, server pushes list of connected phone ids to owner
+	this should propogate onto owner phone's screen
+	when num of players > i, then the "start game" button is enabled
+	when owner presses start game, server updates status on that particular game
+		start game timer and other shit
+		notifies all players that the game has started
+		another message for nearby capture points
+		another message for list of team members and their location
+
+		when phone receives this, phone starts a game loop, starts sending above data every interval
+
+
+//current sprint
+
+phone sends mac address (id) and location
+to route A
+
+server receives this, sends back hardcoded sess key
+also sends back notification that game has started
+	with this notification, give a list of nearby capture points
+
+phone receives sess key, begins game loop (without waiting for lobby)
+
+	in phone game loop
+		send server (same as above) loc data, sess key, id
+
+	server game loop
+		periodically send all connected phones data about
+			list of phone loc for their team (including themselves)
+
+	after a certain time, send a game over msg to all players
+		send information about the status of the game:
+			each team score
