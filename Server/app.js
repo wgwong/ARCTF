@@ -7,9 +7,9 @@ var cookieParser = require("cookie-parser");
 var bodyParser = require("body-parser");
 
 // Import route handlers
-//var index = require('./routes/index');
-//var users = require('./routes/users');
-//var requests = require('./routes/requests');
+var index = require('./routes/index');
+var users = require('./routes/users');
+var requests = require('./routes/requests');
 
 //import backend database handler
 var mongoose = require("mongoose");
@@ -64,6 +64,7 @@ var main = (function Main() {
 	// encrypted cookied).
 	that.app.use(function(req, res, next) {
 		if (req.session.username) {
+			next();
 			/*
 			User.getUserData(req.session.username, function(err, user) {
 				if (user) {
@@ -80,7 +81,7 @@ var main = (function Main() {
 	});
 
 	// Map paths to imported route handlers
-	//that.app.use('/', index);
+	that.app.use('/', index);
 	//that.app.use('/users', users);
 	//that.app.use('/requests', requests);
 
