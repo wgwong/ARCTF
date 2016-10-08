@@ -6,6 +6,7 @@ import android.location.Location;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,7 +28,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import static com.google.android.gms.common.api.GoogleApiClient.*;
 
-public class PlayerMap extends MapFragment implements ConnectionCallbacks,
+public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment implements ConnectionCallbacks,
         OnConnectionFailedListener, LocationListener, OnMapReadyCallback {
 
     public static final String TAG = PlayerMap.class.getSimpleName();
@@ -44,7 +45,7 @@ public class PlayerMap extends MapFragment implements ConnectionCallbacks,
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.activity_player_map);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        MapFragment mapFragment = (MapFragment) getFragmentManager()
+        SupportMapFragment mapFragment = (SupportMapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         mGoogleApiClient = new Builder(getActivity())
@@ -59,12 +60,7 @@ public class PlayerMap extends MapFragment implements ConnectionCallbacks,
                 .setFastestInterval(1 * 1000);
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.activity_player_map, container, false);
-    }
+
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {

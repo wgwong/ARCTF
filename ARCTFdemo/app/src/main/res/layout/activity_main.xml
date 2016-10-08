@@ -13,6 +13,7 @@
 
     <fragment android:name="com.demo.arctf.arctfdemo.PlayerMap"
         android:id="@+id/map"
+        class="com.demo.arctf.arctfdemo.MapFragConnector"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
