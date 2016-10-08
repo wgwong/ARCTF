@@ -1,11 +1,15 @@
 package com.demo.arctf.arctfdemo;
 
+import android.app.Fragment;
 import android.content.IntentSender;
 import android.location.Location;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -15,6 +19,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -22,7 +27,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import static com.google.android.gms.common.api.GoogleApiClient.*;
 
-public class PlayerMap extends FragmentActivity implements ConnectionCallbacks,
+public class PlayerMap extends MapFragment implements ConnectionCallbacks,
         OnConnectionFailedListener, LocationListener, OnMapReadyCallback {
 
     public static final String TAG = PlayerMap.class.getSimpleName();
@@ -34,14 +39,15 @@ public class PlayerMap extends FragmentActivity implements ConnectionCallbacks,
     LocationSettingsRequest.Builder builder;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "RUNNING PLAYER MAP @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_player_map);
+        //setContentView(R.layout.activity_player_map);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+        MapFragment mapFragment = (MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        mGoogleApiClient = new Builder(this)
+        mGoogleApiClient = new Builder(getActivity())
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
@@ -51,6 +57,13 @@ public class PlayerMap extends FragmentActivity implements ConnectionCallbacks,
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(10 * 1000)        // 10 seconds, in milliseconds
                 .setFastestInterval(1 * 1000);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.activity_player_map, container, false);
     }
 
     @Override
@@ -91,7 +104,7 @@ public class PlayerMap extends FragmentActivity implements ConnectionCallbacks,
         if (connectionResult.hasResolution()) {
             try {
                 // Start an Activity that tries to resolve the error
-                connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
+                connectionResult.startResolutionForResult(getActivity(), CONNECTION_FAILURE_RESOLUTION_REQUEST);
             } catch (IntentSender.SendIntentException e) {
                 e.printStackTrace();
             }
@@ -100,13 +113,13 @@ public class PlayerMap extends FragmentActivity implements ConnectionCallbacks,
         }
     }
 
-    protected void onStart(){
+    public void onStart(){
         Log.i("Test", "Starting...");
         mGoogleApiClient.connect();
         super.onStart();
     }
 
-    protected void onStop() {
+    public void onStop() {
         mGoogleApiClient.disconnect();
         super.onStop();
     }
@@ -125,7 +138,7 @@ public class PlayerMap extends FragmentActivity implements ConnectionCallbacks,
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
         if (mGoogleApiClient.isConnected()) {
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
@@ -134,7 +147,7 @@ public class PlayerMap extends FragmentActivity implements ConnectionCallbacks,
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         mGoogleApiClient.connect();
     }

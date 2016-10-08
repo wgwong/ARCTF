@@ -11,10 +11,7 @@ import com.github.nkzawa.emitter.Emitter;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URISyntaxException;
-
-
-public class MainActivity extends AppCompatActivity {
+import java.net.URISyntaxException;public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,3 +34,6 @@ public class MainActivity extends AppCompatActivity {
         Log.d("debug", "succeed?");
     }
 }
+
+
+
