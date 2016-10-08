@@ -159,7 +159,7 @@ public class NetworkClient extends Fragment {
                 @Override
                 public void run() {
                     String data = (String) args[0];
-                    // Log.d("debug", "data is: " + data.toString());
+                    Log.d("debug", "data is: " + data.toString());
                     /*
                     String username;
                     String message;

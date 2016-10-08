@@ -6,10 +6,10 @@
     android:layout_height="match_parent"
     tools:context="com.demo.arctf.arctfdemo.MainActivity">
 
-   <!-- <fragment android:name="com.demo.arctf.arctfdemo.NetworkClient"
+    <fragment android:name="com.demo.arctf.arctfdemo.NetworkClient"
         android:id="@+id/main"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>-->
+        android:layout_height="match_parent"/>
 
     <fragment android:name="com.demo.arctf.arctfdemo.PlayerMap"
         android:id="@+id/map"

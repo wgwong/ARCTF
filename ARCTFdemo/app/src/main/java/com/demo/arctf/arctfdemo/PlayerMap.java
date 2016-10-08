@@ -85,6 +85,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         Log.i("Info", "Updating Location");
         LatLng newLoc = new LatLng(location.getLatitude(), location.getLongitude());
         if(mMap != null) {
+         mMap.clear();
          mMap.addMarker(new MarkerOptions().position(newLoc).title("PlayerLoc"));
          mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newLoc, 14));
         }
