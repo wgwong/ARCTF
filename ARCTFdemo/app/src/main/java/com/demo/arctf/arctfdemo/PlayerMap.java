@@ -35,7 +35,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
-    Location mLastLocation;
+    private LatLng mLastLocation;
     LocationRequest mLocationRequest;
     LocationSettingsRequest.Builder builder;
 
@@ -84,6 +84,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         Log.d(TAG, location.toString());
         Log.i("Info", "Updating Location");
         LatLng newLoc = new LatLng(location.getLatitude(), location.getLongitude());
+        mLastLocation = newLoc;
         if(mMap != null) {
          mMap.clear();
          mMap.addMarker(new MarkerOptions().position(newLoc).title("PlayerLoc"));
@@ -147,5 +148,10 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     public void onResume() {
         super.onResume();
         mGoogleApiClient.connect();
+    }
+
+    public LatLng getLastKnownLatLng()
+    {
+        return mLastLocation;
     }
 }
