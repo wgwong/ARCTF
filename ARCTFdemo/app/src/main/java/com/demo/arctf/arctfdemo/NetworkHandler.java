@@ -23,15 +23,16 @@ import java.util.HashMap;
 public class NetworkHandler extends AppCompatActivity {
     NetworkClient networkClient;
     String macAddress;
-    PlayerMap playerMap;
+    MapFragConnector playerMap;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
         connectToServer();
         WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         WifiInfo info = manager.getConnectionInfo();
         String address = info.getMacAddress();
-        playerMap = (PlayerMap) getSupportFragmentManager().findFragmentById(R.id.map);
+        playerMap = (MapFragConnector) getSupportFragmentManager().findFragmentById(R.id.map);
         playerMap.setUsername(macAddress);
         // Start update loop
         final Handler handler = new Handler();
