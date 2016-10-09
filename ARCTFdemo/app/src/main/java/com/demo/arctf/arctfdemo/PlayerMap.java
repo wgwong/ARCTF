@@ -27,6 +27,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import static com.google.android.gms.common.api.GoogleApiClient.*;
 
@@ -38,6 +39,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private LatLng mLastLocation;
+    private String username;
     LocationRequest mLocationRequest;
     LocationSettingsRequest.Builder builder;
 
@@ -89,7 +91,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         mLastLocation = newLoc;
         if(mMap != null) {
          mMap.clear();
-         mMap.addMarker(new MarkerOptions().position(newLoc).title("PlayerLoc"));
+         mMap.addMarker(new MarkerOptions().position(newLoc).title(username));
          mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newLoc, 14));
         }
     }
@@ -151,18 +153,26 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         super.onResume();
         mGoogleApiClient.connect();
     }
-
+    public void setUsername(String name)
+    {
+        username = name;
+    }
     public LatLng getLastKnownLatLng()
     {
         return mLastLocation;
     }
-    public void updateMap(ArrayList<LatLng> playerLocations)
+    public void updateMap(HashMap<String, ArrayList<LatLng>> playerLocations)
     {
         mMap.clear();
-        for(LatLng playerLoc: playerLocations)
+        for(String name: playerLocations.keySet())
         {
-            // TODO(david): Add local location of player rather than received one
-            mMap.addMarker(new MarkerOptions().position(playerLoc));
+            if (name == username)
+                mMap.addMarker(new MarkerOptions().position(mLastLocation).title(username));
+            else {
+                ArrayList<LatLng> locationArray = playerLocations.get(name);
+                LatLng lastLocation = locationArray.get(locationArray.size()-1);
+                mMap.addMarker(new MarkerOptions().position(lastLocation).title(name));
+            }
         }
     }
 }

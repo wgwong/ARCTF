@@ -13,6 +13,8 @@ import android.widget.Toast;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;
 
+import org.json.JSONObject;
+
 
 /**
  * Use the {@link NetworkClient#newInstance} factory method to
@@ -160,18 +162,6 @@ public class NetworkClient extends Fragment {
                 public void run() {
                     String data = (String) args[0];
                     Log.d("debug", "data is: " + data.toString());
-                    /*
-                    String username;
-                    String message;
-                    try {
-                        username = data.getString("username");
-                        message = data.getString("message");
-                    } catch (JSONException e) {
-                        return;
-                    }*/
-
-                    // add the message to view
-                    //addMessage(username, message);
                 }
             });
         }
@@ -184,5 +174,14 @@ public class NetworkClient extends Fragment {
         }
         mSocket.emit("session", "hello world");
         Log.d("debug", "establish session: emitted message");
+    }
+
+    public void updateLocation(JSONObject playerLoc) {
+        Log.d("debug", "update location called");
+        if (mSocket == null) {
+            Log.d("debug", "why is msocket null when updatelocation");
+        }
+        mSocket.emit("playerUpdate", playerLoc);
+        Log.d("debug", "playerUpdate sent");
     }
 }

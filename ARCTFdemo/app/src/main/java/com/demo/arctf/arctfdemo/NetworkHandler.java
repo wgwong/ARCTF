@@ -15,6 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by David on 10/8/2016.
@@ -31,7 +32,7 @@ public class NetworkHandler extends AppCompatActivity {
         WifiInfo info = manager.getConnectionInfo();
         String address = info.getMacAddress();
         playerMap = (PlayerMap) getSupportFragmentManager().findFragmentById(R.id.map);
-
+        playerMap.setUsername(macAddress);
         // Start update loop
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -45,11 +46,10 @@ public class NetworkHandler extends AppCompatActivity {
     }
 
     /**
-     * @param playerLocations list of latitude and longitude of each player
+     * @param playerLocations hashmap of mac addresses to list of latitude and longitude of each player
      */
-    public void updateMap(ArrayList<LatLng> playerLocations)
+    public void updateMap(HashMap<String, ArrayList<LatLng>> playerLocations)
     {
-        // TODO(david): Update to take player names as well
         playerMap.updateMap(playerLocations);
     }
 
