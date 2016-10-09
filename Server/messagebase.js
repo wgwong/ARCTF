@@ -18,11 +18,6 @@ var Messagebase = (function Messagebase() {
 	that.setIO = function(IO) {
 		io = IO;
 
-		console.log("msg base set io");
-
-		console.log("is it null? ", io == null);
-		console.log("is it undef? ", io == undefined);
-
 		//io connection
 		io.on('connection', function(socket){
 			console.log("connection established");
@@ -36,6 +31,7 @@ var Messagebase = (function Messagebase() {
 			});
 
 			socket.on('playerUpdate', function(data) {
+				console.log("playerUpdate called, data: ", data);
 				player = data.address;
 				latitude = data.latitude;
 				longitude = data.longitude;
@@ -46,18 +42,19 @@ var Messagebase = (function Messagebase() {
 
 				if (userData[player]['coordinates'].length > COORD_SIZE_CAP) {
 					userData[player]['coordinates'].pop(0);
-					userData[player]['coordinates'].push([latitude, longitude]);
 				}
+				userData[player]['coordinates'].push([latitude, longitude]);
 				userData[player]['timestamp'] = new Date();
 
 				//DEBUG
-				io.emit("playerUpdate_confirm", [true, userData]);
+				console.log("emitting: ", userData);
+				io.emit("playerUpdate_confirm", userData);
 			});
 
 		});
 
 		setInterval( () => {
-			io.emit("session", "this is a timed message " + (new Date().getTime()));
+			io.emit("session", "this is a timed message " + userData);
 		}, 5000); // 1000 = 1 sec
 
 		setInterval( () => {
