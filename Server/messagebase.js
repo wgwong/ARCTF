@@ -48,34 +48,27 @@ var Messagebase = (function Messagebase() {
 					userData[player]['coordinates'].pop(0);
 					userData[player]['coordinates'].push([latitude, longitude]);
 				}
+				userData[player]['timestamp'] = new Date();
 
 				//DEBUG
 				io.emit("playerUpdate_confirm", [true, userData]);
 			});
 
-			socket.on('chat message', function(msg, from, to, date) {
-				if (Object.keys(messages).indexOf(to) === -1) {
-					messages[to] = {};
-				}
-				if (Object.keys(messages[to]).indexOf(from) === -1) {
-					messages[to][from] = [];
-				}
-				messages[to][from].push([msg, date, false]);
-				if (Object.keys(messages).indexOf(from) === -1) {
-					messages[from] = {};
-				}
-				if (Object.keys(messages[from]).indexOf(to) === -1) {
-					messages[from][to] = [];
-				}
-				messages[from][to].push([msg, date, true]);
-
-				io.emit("chat message", msg, from, to, date);
-			});
 		});
 
 		setInterval( () => {
 			io.emit("session", "this is a timed message " + (new Date().getTime()));
-		}, 1000);
+		}, 5000); // 1000 = 1 sec
+
+		setInterval( () => {
+			now = new Date();
+			for (pIndex in userData) {
+				playerTimestamp = userData[pIndex]['timestamp'];
+				if (now - playerTimestamp > 60000) { //if last update was more than a minute ago
+					io.emit("playerShutdown", userData[pIndex]); //emit to everyone that player x has been disconnected
+				}
+			}
+		}, 20000);
 	}
 
 	that.login = function(username) {
