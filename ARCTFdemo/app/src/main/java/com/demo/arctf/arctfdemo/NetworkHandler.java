@@ -34,16 +34,17 @@ public class NetworkHandler extends AppCompatActivity {
         String address = info.getMacAddress();
         playerMap = (MapFragConnector) getSupportFragmentManager().findFragmentById(R.id.map);
         playerMap.setUsername(macAddress);
+        // TODO(david): Async Calls - call handler after address is received and map is created
         // Start update loop
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                //Do something after 20 seconds
+                Log.d("Handler", "Calling Update Server");
                 updateServer();
-                handler.postDelayed(this, 10000);
+                handler.postDelayed(this, 5000);
             }
-        }, 200000);
+        }, 15000);
     }
 
     /**
@@ -58,13 +59,16 @@ public class NetworkHandler extends AppCompatActivity {
     {
         JSONObject jsonObj = new JSONObject();
         LatLng curLoc = playerMap.getLastKnownLatLng();
-        try {
-            jsonObj.put("address", macAddress);
-            jsonObj.put("latitude", curLoc.latitude);
-            jsonObj.put("longitude", curLoc.longitude);
-        }
-        catch(JSONException ex) {
-            ex.printStackTrace();
+        if(curLoc !=null) {
+            try {
+                jsonObj.put("address", macAddress);
+                jsonObj.put("latitude", curLoc.latitude);
+                jsonObj.put("longitude", curLoc.longitude);
+                Log.d("Message", "Sending Location to Server");
+                networkClient.updateLocation(jsonObj);
+            } catch (JSONException ex) {
+                ex.printStackTrace();
+            }
         }
     }
     public void connectToServer() {

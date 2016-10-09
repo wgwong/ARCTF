@@ -12,8 +12,15 @@ import android.widget.Toast;
 
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;
+import com.google.android.gms.maps.model.LatLng;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
 
 /**
@@ -59,6 +66,7 @@ public class NetworkClient extends Fragment {
         mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
         mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
         mSocket.on("session", onEstablishSession);
+        mSocket.on("playerUpdate_confirm", onUpdate);
         mSocket.connect();
 
         Log.d("debug", "mf oncreate finish");
@@ -162,6 +170,44 @@ public class NetworkClient extends Fragment {
                 public void run() {
                     String data = (String) args[0];
                     Log.d("debug", "data is: " + data.toString());
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onUpdate = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d("Update", "RECEIVING PLAYER LOCATIONS");
+                    Log.d("JSON", args[0].toString());
+                    NetworkHandler networkHandler = (NetworkHandler) getActivity();
+                    JSONObject data = (JSONObject) args[0];
+                    Iterator<String> keys = data.keys();
+                    HashMap<String,ArrayList<LatLng>> playerLocations = new HashMap<String, ArrayList<LatLng>>();
+                    while( keys.hasNext() ) {
+                        String key = (String)keys.next();
+                        try
+                        {
+                            JSONObject player = (JSONObject) data.get(key);
+                            JSONArray coordinates = (JSONArray) player.get("coordinates");
+                            ArrayList<LatLng> locations = new ArrayList<LatLng>();
+                            for(int i=0; i < coordinates.length(); i++)
+                            {
+                                JSONArray latlng = (JSONArray) coordinates.get(i);
+                                locations.add(i,new LatLng((double)latlng.get(0),(double)latlng.get(1)) );
+                            }
+                            playerLocations.put(key, locations);
+                        }
+                        catch(JSONException ex){
+                            ex.printStackTrace();
+                        }
+                    }
+                    networkHandler.updateMap(playerLocations);
+                   // {"undefined":{"name":"test","team":"gray","coordinates":[[42.357999,-71.0933371],
+
                 }
             });
         }

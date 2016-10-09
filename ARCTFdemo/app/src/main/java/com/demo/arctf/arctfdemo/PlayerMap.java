@@ -163,6 +163,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     }
     public void updateMap(HashMap<String, ArrayList<LatLng>> playerLocations)
     {
+        Log.d("Update", "Updating Map");
         mMap.clear();
         for(String name: playerLocations.keySet())
         {
