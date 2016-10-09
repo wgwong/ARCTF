@@ -26,6 +26,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+
 import static com.google.android.gms.common.api.GoogleApiClient.*;
 
 public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment implements ConnectionCallbacks,
@@ -153,5 +155,14 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     public LatLng getLastKnownLatLng()
     {
         return mLastLocation;
+    }
+    public void updateMap(ArrayList<LatLng> playerLocations)
+    {
+        mMap.clear();
+        for(LatLng playerLoc: playerLocations)
+        {
+            // TODO(david): Add local location of player rather than received one
+            mMap.addMarker(new MarkerOptions().position(playerLoc));
+        }
     }
 }
