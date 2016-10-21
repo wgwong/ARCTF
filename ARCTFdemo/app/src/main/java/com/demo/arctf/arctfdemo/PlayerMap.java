@@ -45,7 +45,6 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "RUNNING PLAYER MAP @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.activity_player_map);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -92,7 +91,19 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         if(mMap != null) {
          mMap.clear();
          mMap.addMarker(new MarkerOptions().position(newLoc).title(username));
-         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newLoc, 14));
+         mMap.moveCamera(CameraUpdateFactory.newLatLng(newLoc));
+        }
+    }
+
+    private void handleFirstLocation(Location location) {
+        Log.d(TAG, location.toString());
+        Log.i("Info", "Updating First Location");
+        LatLng newLoc = new LatLng(location.getLatitude(), location.getLongitude());
+        mLastLocation = newLoc;
+        if(mMap != null) {
+            mMap.clear();
+            mMap.addMarker(new MarkerOptions().position(newLoc).title(username));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newLoc,14));
         }
     }
 
