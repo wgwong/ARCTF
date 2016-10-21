@@ -36,6 +36,8 @@ public class NetworkHandler extends AppCompatActivity {
         playerMap.setUsername(macAddress);
         // TODO(david): Async Calls - call handler after address is received and map is created
         // Start update loop
+        // TODO(david): handle this more elegantly instead of waiting
+        while(macAddress == null || playerMap == null);
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -44,7 +46,7 @@ public class NetworkHandler extends AppCompatActivity {
                 updateServer();
                 handler.postDelayed(this, 5000);
             }
-        }, 15000);
+        }, 5000);
     }
 
     /**
