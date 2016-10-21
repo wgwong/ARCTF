@@ -37,7 +37,9 @@ public class NetworkHandler extends AppCompatActivity {
         // TODO(david): Async Calls - call handler after address is received and map is created
         // Start update loop
         // TODO(david): handle this more elegantly instead of waiting
-        while(macAddress == null || playerMap == null);
+        while(macAddress == null || playerMap == null){
+            Log.d("Waiting", "Undefined macAddress or playerMap");
+        };
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
