@@ -43,10 +43,11 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     private GoogleApiClient mGoogleApiClient;
     private LatLng mLastLocation;
     private String username;
-    private ArrayList<CapturePoint> capturePoints;
-    private ArrayList<Marker> capturePointMarkers;
+    private CapturePoint.State team;
+    private HashMap<Marker, CapturePoint> capturePoints;
     private Queue<Marker> playerMarkers;
     private Marker playerLocation;
+    private NetworkHandler networkHandler;
     LocationRequest mLocationRequest;
     LocationSettingsRequest.Builder builder;
 
@@ -188,18 +189,23 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     /*
      * Adds capture points to map
      */
-    public void populatePoints(ArrayList<CapturePoint> capturePointList)
+    public void populateCapturePoints(ArrayList<CapturePoint> capturePointList)
     {
         for(CapturePoint point: capturePointList)
         {
-            capturePointList.add(point);
+            //capturePointList.add(point);
             Marker captureMarker = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
                     icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
                     .title(point.getName()));
-            capturePointMarkers.add(captureMarker);
+            capturePoints.put(captureMarker, point);
         }
     }
 
+    // Set team of player
+    public void setTeam(CapturePoint.State teamColor)
+    {
+        team = teamColor;
+    }
     private void clearOtherPlayerMarkers()
     {
         Marker marker = playerMarkers.poll();
@@ -225,12 +231,33 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         }
     }
 
+    public void setNetworkHandler(NetworkHandler handler)
+    {
+        networkHandler = handler;
+    }
     public boolean onMarkerClick(Marker marker) {
 
         // TODO(david): register listener
-        if(capturePoints.contains(marker))
+        if(capturePoints.keySet().contains(marker))
         {
             // Send message to server requesting capture
+            LatLng pointLocation = capturePoints.get(marker).getLocation();
+            float distance[] = null;
+            Location.distanceBetween(mLastLocation.latitude, pointLocation.longitude,
+                    mLastLocation.latitude, pointLocation.longitude, distance);
+            if(networkHandler != null) {
+                if (distance != null) {
+                    if (distance[0] < 50) {
+                        // Send the capture message
+                        networkHandler.capturePoint(username, capturePoints.get(marker).getName());
+                    }
+
+                }
+            }
+            else
+            {
+                throw new NullPointerException("Network Handler is undefined in PlayerMap");
+            }
         }
         return false;
     }

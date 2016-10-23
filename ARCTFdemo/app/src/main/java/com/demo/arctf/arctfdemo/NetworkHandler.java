@@ -16,24 +16,27 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
 
 /**
  * Created by David on 10/8/2016.
  */
 public class NetworkHandler extends AppCompatActivity {
     NetworkClient networkClient;
-    String macAddress;
+    String uniqueID;
     MapFragConnector playerMap;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Sending reference to PlayerMap
         setContentView(R.layout.activity_main);
         connectToServer();
         WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         WifiInfo info = manager.getConnectionInfo();
-        String address = info.getMacAddress();
+        String uniqueID = UUID.randomUUID().toString();
         playerMap = (MapFragConnector) getSupportFragmentManager().findFragmentById(R.id.map);
-        playerMap.setUsername(macAddress);
+        playerMap.setUsername(uniqueID);
+        playerMap.setNetworkHandler(this);
         /* TODO(david): Async Calls - call handler after address is received and map is created
             must change id from mac address
          */
@@ -64,7 +67,7 @@ public class NetworkHandler extends AppCompatActivity {
         LatLng curLoc = playerMap.getLastKnownLatLng();
         if(curLoc !=null) {
             try {
-                jsonObj.put("address", macAddress);
+                jsonObj.put("username", uniqueID);
                 jsonObj.put("latitude", curLoc.latitude);
                 jsonObj.put("longitude", curLoc.longitude);
                 Log.d("Message", "Sending Location to Server");
@@ -72,6 +75,17 @@ public class NetworkHandler extends AppCompatActivity {
             } catch (JSONException ex) {
                 ex.printStackTrace();
             }
+        }
+    }
+    public void capturePoint(String username, String pointName) {
+        JSONObject jsonObj = new JSONObject();
+        try {
+            jsonObj.put("player", username);
+            jsonObj.put("capturePoint", pointName);
+            Log.d("Message", "Sending Capture Request Server");
+            networkClient.updateLocation(jsonObj);
+        } catch (JSONException ex) {
+            ex.printStackTrace();
         }
     }
     public void connectToServer() {
@@ -93,6 +107,6 @@ public class NetworkHandler extends AppCompatActivity {
      */
     public void populateCapturePoints(ArrayList<CapturePoint> capturePoints)
     {
-
+        playerMap.populateCapturePoints(capturePoints);
     }
 }

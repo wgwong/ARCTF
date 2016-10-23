@@ -45,4 +45,14 @@ public class MapFragConnector extends Fragment {
     {
         mapFragment.updateMap(playerLocations);
     }
+
+    public void populateCapturePoints(ArrayList<CapturePoint> capturePoints)
+    {
+        mapFragment.populateCapturePoints(capturePoints);
+    }
+
+    public void setNetworkHandler(NetworkHandler handler)
+    {
+        mapFragment.setNetworkHandler(handler);
+    }
 }

@@ -231,21 +231,32 @@ public class NetworkClient extends Fragment {
                         try
                         {
                             JSONObject point = (JSONObject) data.get(key);
-                            // TODO(david): Create point with location and name
-                            //CapturePoint pt = new CapturePoint(point.)
-                            // capturePoints.add(pt);
+                            String owner = (String) point.get("ownedby");
+                            CapturePoint.State currentState = CapturePoint.State.NEUTRAL;
+                            if(owner == "blue")
+                                currentState = CapturePoint.State.BLUE;
+                            else if (owner == "red")
+                                currentState = CapturePoint.State.RED;
+                            JSONArray coordinates = (JSONArray) point.get("coordinates");
+                            LatLng latlng = new LatLng((double)coordinates.get(0),(double)coordinates.get(1));
+
+                            CapturePoint pt = new CapturePoint(latlng, key);
+                            pt.setState(currentState);
+                            capturePoints.add(pt);
                         }
                         catch(JSONException ex){
                             ex.printStackTrace();
                         }
                     }
                     // SEND list of points to network handler which has function to update map
-                    // networkHandler.populateCapturePoints(ArrayList<CapturePoint>);
+                    networkHandler.populateCapturePoints(capturePoints);
 
                 }
             });
         }
     };
+
+
 
     public void establishSession() {
         Log.d("debug", "establish session called");
@@ -262,6 +273,16 @@ public class NetworkClient extends Fragment {
             Log.d("debug", "why is msocket null when updatelocation");
         }
         mSocket.emit("playerUpdate", playerLoc);
+        Log.d("debug", "playerUpdate sent");
+    }
+
+    public void capturePoint(JSONObject captureRequest) {
+        Log.d("debug", "capture point called");
+        if (mSocket == null) {
+            Log.d("debug", "why is msocket null when updatelocation");
+        }
+
+        mSocket.emit("capture", captureRequest);
         Log.d("debug", "playerUpdate sent");
     }
 
