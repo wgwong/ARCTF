@@ -2,11 +2,14 @@ package com.demo.arctf.arctfdemo;
 
 import android.app.Fragment;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,6 +34,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Queue;
+import java.util.Random;
+import java.util.UUID;
 
 import static com.google.android.gms.common.api.GoogleApiClient.*;
 
@@ -77,17 +82,34 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     public void onConnected(@Nullable Bundle bundle) {
         Log.i(TAG, "Location services connected.");
         try {
-           Location location = LocationServices.FusedLocationApi.getLastLocation(
+            //int permissionCheck = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION);
+
+            /*
+            if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+                //Execute location service call if user has explicitly granted ACCESS_FINE_LOCATION..
+            }*/
+
+            Random rn = new Random();
+            int requestCode = rn.nextInt(65535);
+
+
+            ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, requestCode);
+
+            Location location = LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
             if (location == null) {
                 //LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+                Log.d("debug", "location is null"); //debug
             }
             else {
+                Log.d("debug", "location is not null");
+                Log.d("debug", location.toString());
                 handleFirstLocation(location);
             };
         } catch (SecurityException s) {
             //TODO: Handle Security Exception
+            Log.d("debug", "security exception: " + s.toString());
         }
     }
 
@@ -106,6 +128,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     }
 
     private void handleFirstLocation(Location location) {
+        Log.d("debug", "handleFirstLocation called");
         Log.d(TAG, location.toString());
         Log.i("Info", "Updating First Location");
         LatLng newLoc = new LatLng(location.getLatitude(), location.getLongitude());
@@ -191,13 +214,14 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
      */
     public void populateCapturePoints(ArrayList<CapturePoint> capturePointList)
     {
-        for(CapturePoint point: capturePointList)
-        {
-            //capturePointList.add(point);
-            Marker captureMarker = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
-                    icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-                    .title(point.getName()));
-            capturePoints.put(captureMarker, point);
+        if(mMap != null) {
+            for (CapturePoint point : capturePointList) {
+                //capturePointList.add(point);
+                Marker captureMarker = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
+                        icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                        .title(point.getName()));
+                capturePoints.put(captureMarker, point);
+            }
         }
     }
 

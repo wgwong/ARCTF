@@ -25,6 +25,8 @@ captureData = {};
 	}
 */
 
+teams = {};
+
 
 var Messagebase = (function Messagebase() {
 	var that = Object.create(Messagebase.prototype);
@@ -57,6 +59,8 @@ var Messagebase = (function Messagebase() {
 			'coordinates': [42.357242, -71.095119],
 			'lastCaptured': new Date()
 		}
+		teams["red"] = {};
+		teams["blue"] = {};
 	}
 
 	that.setIO = function(IO) {
@@ -77,7 +81,20 @@ var Messagebase = (function Messagebase() {
 			socket.on('session', function(data){
 				console.log("new phone connected: ", data);
 
-				userData[data.player] = {'name': 'test', 'team': 'gray', 'coordinates': []};
+				teamAssignment = "";
+				if (teams["blue"].length <= teams["red"].length) {
+					teamAssignment = "blue";
+					teams["blue"][data.player] = true;
+				}
+				else {
+					teamAssignment = "red";
+					teams["red"][data.player] = true;;
+				}
+
+				userData[data.player] = {'name': 'test', 'team': teamAssignment, 'coordinates': []};
+
+				console.log("team assignments: ", teams);
+
 
 				io.emit("gameStatusUpdate", captureData);
 			});
@@ -134,11 +151,12 @@ var Messagebase = (function Messagebase() {
 
 		});
 
-		setInterval( () => {
+		
+		setInterval( function() {
 			io.emit("session", "this is a timed message " + userData);
 		}, 5000); // 1000 = 1 sec
 
-		setInterval( () => {
+		setInterval( function() {
 			now = new Date();
 			for (pIndex in userData) {
 				playerTimestamp = userData[pIndex]['timestamp'];
@@ -147,6 +165,7 @@ var Messagebase = (function Messagebase() {
 				}
 			}
 		}, 20000);
+
 	}
 
 	that.login = function(username) {

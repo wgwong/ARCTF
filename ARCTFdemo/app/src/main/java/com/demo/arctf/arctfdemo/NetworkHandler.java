@@ -31,9 +31,10 @@ public class NetworkHandler extends AppCompatActivity {
         // Sending reference to PlayerMap
         setContentView(R.layout.activity_main);
         connectToServer();
-        WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        WifiInfo info = manager.getConnectionInfo();
         String uniqueID = UUID.randomUUID().toString();
+
+        Log.d("debug", "networkhandler oncreate called");
+
         playerMap = (MapFragConnector) getSupportFragmentManager().findFragmentById(R.id.map);
         playerMap.setUsername(uniqueID);
         playerMap.setNetworkHandler(this);

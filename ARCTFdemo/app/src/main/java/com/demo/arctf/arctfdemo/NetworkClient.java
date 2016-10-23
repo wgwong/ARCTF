@@ -231,7 +231,7 @@ public class NetworkClient extends Fragment {
                         try
                         {
                             JSONObject point = (JSONObject) data.get(key);
-                            String owner = (String) point.get("ownedby");
+                            String owner = point.get("ownedBy").toString();
                             CapturePoint.State currentState = CapturePoint.State.NEUTRAL;
                             if(owner == "blue")
                                 currentState = CapturePoint.State.BLUE;
