@@ -198,6 +198,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
                     icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
                     .title(point.getName()));
             capturePoints.put(captureMarker, point);
+            Log.d("debug", capturePoints.toString());
         }
     }
 
