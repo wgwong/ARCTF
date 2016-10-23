@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.Queue;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.google.android.gms.common.api.GoogleApiClient.*;
 
@@ -63,6 +64,8 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
+        playerMarkers = new ConcurrentLinkedQueue<Marker>();
+        capturePoints = new HashMap<Marker, CapturePoint>();
         mapFragment.getMapAsync(this);
         mGoogleApiClient = new Builder(getActivity())
                 .addConnectionCallbacks(this)
@@ -232,11 +235,12 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     }
     private void clearOtherPlayerMarkers()
     {
-        Marker marker = playerMarkers.poll();
-        while(marker != null)
-        {
-            marker.remove();
-            marker = playerMarkers.poll();
+        if (playerMarkers != null) {
+            Marker marker = playerMarkers.poll();
+            while (marker != null) {
+                marker.remove();
+                marker = playerMarkers.poll();
+            }
         }
     }
     public void updateMap(HashMap<String, ArrayList<LatLng>> playerLocations)
@@ -266,7 +270,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         {
             // Send message to server requesting capture
             LatLng pointLocation = capturePoints.get(marker).getLocation();
-            float distance[] = null;
+            float distance[] = new float[1];
             Location.distanceBetween(mLastLocation.latitude, pointLocation.longitude,
                     mLastLocation.latitude, pointLocation.longitude, distance);
             if(networkHandler != null) {
