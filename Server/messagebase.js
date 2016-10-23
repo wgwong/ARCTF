@@ -5,8 +5,26 @@
 //var messages = {}; //key = target_user, value = dictionary where key = src, value = array of message tuples (msg, date, self?) including self, msg
 
 
-userData = {}; //key = user
-//vaue = dictionary
+userData = {};
+/*
+	key = userKey
+	value = {
+		name: string
+		team: string
+		coordinates: tuple of floats
+		timestamp: datetime
+	}
+*/
+captureData = {};
+/*
+	key = unique id for spawnpoint
+	value = {
+		ownedBy: string //team name
+		coordinates: tuple of floats
+		lastCaptured: datetime
+	}
+*/
+
 
 var Messagebase = (function Messagebase() {
 	var that = Object.create(Messagebase.prototype);
@@ -15,7 +33,36 @@ var Messagebase = (function Messagebase() {
 
 	var COORD_SIZE_CAP = 20;
 
+	that.setUp = function() {
+		captureData['a'] = {
+			'ownedBy': null,
+			'coordinates': [42.357836,-71.093371],
+			'lastCaptured': new Date()
+		}
+
+		captureData['b'] = {
+			'ownedBy': null,
+			'coordinates': [42.358328, -71.093843],
+			'lastCaptured': new Date()
+		}
+
+		captureData['c'] = {
+			'ownedBy': null,
+			'coordinates': [42.357202, -71.092641],
+			'lastCaptured': new Date()
+		}
+
+		captureData['d'] = {
+			'ownedBy': null,
+			'coordinates': [42.357242, -71.095119],
+			'lastCaptured': new Date()
+		}
+	}
+
 	that.setIO = function(IO) {
+
+		that.setUp();
+
 		io = IO;
 
 		//io connection
@@ -25,9 +72,14 @@ var Messagebase = (function Messagebase() {
 			socket.on('disconnect', function(){
 			});
 
-			socket.on('session', function(msg){
-				console.log("message received: ", msg);
-				io.emit("session", "connect world");
+			//on initial connection, create player data
+			//then send current state of the game
+			socket.on('session', function(data){
+				console.log("new phone connected: ", data);
+
+				userData[data.player] = {'name': 'test', 'team': 'gray', 'coordinates': []};
+
+				io.emit("gameStatusUpdate", captureData);
 			});
 
 			socket.on('playerUpdate', function(data) {
@@ -38,6 +90,7 @@ var Messagebase = (function Messagebase() {
 
 				if (!(player in userData)) {
 					userData[player] = {'name': 'test', 'team': 'gray', 'coordinates': []};
+					//should never happen since we must call on session first
 				}
 
 				if (userData[player]['coordinates'].length > COORD_SIZE_CAP) {
@@ -49,6 +102,34 @@ var Messagebase = (function Messagebase() {
 				//DEBUG
 				console.log("emitting: ", userData);
 				io.emit("playerUpdate_confirm", userData);
+			});
+
+			socket.on('capture', function(data) {
+				console.log("someone just tried to capture something: ", data);
+
+				capturePointKey = data.capturePoint;
+				player = data.player;
+
+				now = new Date();
+
+				if (now - capturePointKey['lastCaptured'] > 30000) {
+
+					if (captureData[capturePointKey]['ownedBy'] == null) {
+						captureData[capturePointKey]['ownedBy'] = playerTimestamp;
+						captureData[capturePointKey]['lastCaptured'] = now;
+						io.emit("gameStatusUpdate", captureData); //only run this on success
+					}
+					else {
+						//handle logic regarding team battle over a spawnpoint
+						
+						
+
+						//if successful
+						captureData[capturePointKey]['ownedBy'] = playerTimestamp;
+						captureData[capturePointKey]['lastCaptured'] = now;
+						io.emit("gameStatusUpdate", captureData); //only run this on success
+					}
+				}
 			});
 
 		});
