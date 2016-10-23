@@ -34,12 +34,11 @@ public class NetworkHandler extends AppCompatActivity {
         String address = info.getMacAddress();
         playerMap = (MapFragConnector) getSupportFragmentManager().findFragmentById(R.id.map);
         playerMap.setUsername(macAddress);
-        // TODO(david): Async Calls - call handler after address is received and map is created
+        /* TODO(david): Async Calls - call handler after address is received and map is created
+            must change id from mac address
+         */
+
         // Start update loop
-        // TODO(david): handle this more elegantly instead of waiting
-        while(macAddress == null || playerMap == null){
-            Log.d("Waiting", "Undefined macAddress or playerMap");
-        };
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -48,7 +47,7 @@ public class NetworkHandler extends AppCompatActivity {
                 updateServer();
                 handler.postDelayed(this, 5000);
             }
-        }, 5000);
+        }, 15000);
     }
 
     /**
@@ -87,5 +86,13 @@ public class NetworkHandler extends AppCompatActivity {
         }
 
         Log.d("debug", "succeed?");
+    }
+
+    /*
+     * Adds capture points to map
+     */
+    public void populateCapturePoints(ArrayList<CapturePoint> capturePoints)
+    {
+
     }
 }

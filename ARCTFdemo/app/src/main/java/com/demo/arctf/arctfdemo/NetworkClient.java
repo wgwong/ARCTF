@@ -67,6 +67,7 @@ public class NetworkClient extends Fragment {
         mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
         mSocket.on("session", onEstablishSession);
         mSocket.on("playerUpdate_confirm", onUpdate);
+        mSocket.on("gameStatusUpdate", receiveCapturePoints);
         mSocket.connect();
 
         Log.d("debug", "mf oncreate finish");
@@ -213,6 +214,39 @@ public class NetworkClient extends Fragment {
         }
     };
 
+    private Emitter.Listener receiveCapturePoints = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d("debug", "receiving capture points");
+                    Log.d("JSON", args[0].toString());
+                    NetworkHandler networkHandler = (NetworkHandler) getActivity();
+                    JSONObject data = (JSONObject) args[0];
+                    Iterator<String> keys = data.keys();
+                    ArrayList<CapturePoint> capturePoints = new ArrayList<CapturePoint>();
+                    while( keys.hasNext() ) {
+                        String key = (String)keys.next();
+                        try
+                        {
+                            JSONObject point = (JSONObject) data.get(key);
+                            // TODO(david): Create point with location and name
+                            //CapturePoint pt = new CapturePoint(point.)
+                            // capturePoints.add(pt);
+                        }
+                        catch(JSONException ex){
+                            ex.printStackTrace();
+                        }
+                    }
+                    // SEND list of points to network handler which has function to update map
+                    // networkHandler.populateCapturePoints(ArrayList<CapturePoint>);
+
+                }
+            });
+        }
+    };
+
     public void establishSession() {
         Log.d("debug", "establish session called");
         if (mSocket == null) {
@@ -230,4 +264,5 @@ public class NetworkClient extends Fragment {
         mSocket.emit("playerUpdate", playerLoc);
         Log.d("debug", "playerUpdate sent");
     }
+
 }

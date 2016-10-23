@@ -23,16 +23,19 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Queue;
 
 import static com.google.android.gms.common.api.GoogleApiClient.*;
 
 public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment implements ConnectionCallbacks,
-        OnConnectionFailedListener, LocationListener, OnMapReadyCallback {
+        OnConnectionFailedListener, LocationListener, OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     public static final String TAG = PlayerMap.class.getSimpleName();
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
@@ -40,6 +43,10 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     private GoogleApiClient mGoogleApiClient;
     private LatLng mLastLocation;
     private String username;
+    private ArrayList<CapturePoint> capturePoints;
+    private ArrayList<Marker> capturePointMarkers;
+    private Queue<Marker> playerMarkers;
+    private Marker playerLocation;
     LocationRequest mLocationRequest;
     LocationSettingsRequest.Builder builder;
 
@@ -76,7 +83,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
                 //LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
             }
             else {
-                handleNewLocation(location);
+                handleFirstLocation(location);
             };
         } catch (SecurityException s) {
             //TODO: Handle Security Exception
@@ -89,8 +96,10 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         LatLng newLoc = new LatLng(location.getLatitude(), location.getLongitude());
         mLastLocation = newLoc;
         if(mMap != null) {
-         mMap.clear();
-         mMap.addMarker(new MarkerOptions().position(newLoc).title(username));
+         if (playerLocation != null) {
+             playerLocation.remove();
+         }
+         playerLocation = mMap.addMarker(new MarkerOptions().position(newLoc).title(username));
          mMap.moveCamera(CameraUpdateFactory.newLatLng(newLoc));
         }
     }
@@ -101,8 +110,9 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         LatLng newLoc = new LatLng(location.getLatitude(), location.getLongitude());
         mLastLocation = newLoc;
         if(mMap != null) {
-            mMap.clear();
-            mMap.addMarker(new MarkerOptions().position(newLoc).title(username));
+            if(playerLocation!=null)
+                playerLocation.remove();
+            playerLocation = mMap.addMarker(new MarkerOptions().position(newLoc).title(username));
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newLoc,14));
         }
     }
@@ -142,6 +152,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     {
         Log.d(TAG, "Map is Ready");
         mMap = map;
+        mMap.setOnMarkerClickListener(this);
     }
 
     @Override
@@ -172,19 +183,60 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     {
         return mLastLocation;
     }
+
+
+    /*
+     * Adds capture points to map
+     */
+    public void populatePoints(ArrayList<CapturePoint> capturePointList)
+    {
+        for(CapturePoint point: capturePointList)
+        {
+            capturePointList.add(point);
+            Marker captureMarker = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
+                    icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                    .title(point.getName()));
+            capturePointMarkers.add(captureMarker);
+        }
+    }
+
+    private void clearOtherPlayerMarkers()
+    {
+        Marker marker = playerMarkers.poll();
+        while(marker != null)
+        {
+            marker.remove();
+            marker = playerMarkers.poll();
+        }
+    }
     public void updateMap(HashMap<String, ArrayList<LatLng>> playerLocations)
     {
         Log.d("Update", "Updating Map");
-        mMap.clear();
+        clearOtherPlayerMarkers();
         for(String name: playerLocations.keySet())
         {
-            if (name == username)
-                mMap.addMarker(new MarkerOptions().position(mLastLocation).title(username));
-            else {
+            if (name != username)
+            {
                 ArrayList<LatLng> locationArray = playerLocations.get(name);
                 LatLng lastLocation = locationArray.get(locationArray.size()-1);
-                mMap.addMarker(new MarkerOptions().position(lastLocation).title(name));
+                Marker loc = mMap.addMarker(new MarkerOptions().position(lastLocation).title(name));
+                playerMarkers.add(loc);
             }
         }
+    }
+
+    public boolean onMarkerClick(Marker marker) {
+
+        // TODO(david): register listener
+        if(capturePoints.contains(marker))
+        {
+            // Send message to server requesting capture
+        }
+        return false;
+    }
+
+    public void capturePoint(CapturePoint.State state)
+    {
+        // Set state of capture point to team who has captured
     }
 }
