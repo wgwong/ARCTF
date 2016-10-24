@@ -59,6 +59,12 @@ var Messagebase = (function Messagebase() {
 			'coordinates': [42.357242, -71.095119],
 			'lastCaptured': new Date()
 		}
+
+		captureData['e'] = {
+			'ownedBy': null,
+			'coordinates': [42.359613, -71.091231],
+			'lastCaptured': new Date()
+		}
 		teams["red"] = {};
 		teams["blue"] = {};
 	}
@@ -78,30 +84,31 @@ var Messagebase = (function Messagebase() {
 
 			//on initial connection, create player data
 			//then send current state of the game
-			socket.on('session', function(data){
-				console.log("new phone connected: ", data);
+			socket.on('session', function(player){
+				console.log("new phone connected: ", player);
 
 				teamAssignment = "";
 				if (teams["blue"].length <= teams["red"].length) {
 					teamAssignment = "blue";
-					teams["blue"][data.player] = true;
+					teams["blue"][player] = true;
 				}
 				else {
 					teamAssignment = "red";
-					teams["red"][data.player] = true;;
+					teams["red"][player] = true;;
 				}
 
-				userData[data.player] = {'name': 'test', 'team': teamAssignment, 'coordinates': []};
+				userData[player] = {'name': player, 'team': teamAssignment, 'coordinates': []};
 
 				console.log("team assignments: ", teams);
 
+				setTimeout(function(){}, 3000);
 
 				io.emit("gameStatusUpdate", captureData);
 			});
 
 			socket.on('playerUpdate', function(data) {
 				console.log("playerUpdate called, data: ", data);
-				player = data.address;
+				player = data.player;
 				latitude = data.latitude;
 				longitude = data.longitude;
 
