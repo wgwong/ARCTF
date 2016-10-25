@@ -30,9 +30,8 @@ public class NetworkHandler extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         // Sending reference to PlayerMap
         setContentView(R.layout.activity_main);
+        uniqueID = UUID.randomUUID().toString();
         connectToServer();
-        String uniqueID = UUID.randomUUID().toString();
-
         Log.d("debug", "networkhandler oncreate called");
 
         playerMap = (MapFragConnector) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -68,7 +67,7 @@ public class NetworkHandler extends AppCompatActivity {
         LatLng curLoc = playerMap.getLastKnownLatLng();
         if(curLoc !=null) {
             try {
-                jsonObj.put("username", uniqueID);
+                jsonObj.put("player", uniqueID);
                 jsonObj.put("latitude", curLoc.latitude);
                 jsonObj.put("longitude", curLoc.longitude);
                 Log.d("Message", "Sending Location to Server");
@@ -95,7 +94,7 @@ public class NetworkHandler extends AppCompatActivity {
         networkClient = (NetworkClient) getSupportFragmentManager().findFragmentById(R.id.main);
 
         if (networkClient != null) {
-            networkClient.establishSession();
+            networkClient.establishSession(uniqueID);
         } else {
             Log.d("debug", "m is null!");
         }

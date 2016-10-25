@@ -5,5 +5,5 @@ package com.demo.arctf.arctfdemo;
  */
 
 public class Constants {
-    public static final String SERVER_URL = "http://18.189.80.146:3000";
+    public static final String SERVER_URL = "http://18.189.80.39:3000";
 }

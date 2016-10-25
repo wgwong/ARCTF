@@ -51,6 +51,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     private String username;
     private CapturePoint.State team;
     private HashMap<Marker, CapturePoint> capturePoints;
+    private ArrayList<CapturePoint> capturePointArray;
     private Queue<Marker> playerMarkers;
     private Marker playerLocation;
     private NetworkHandler networkHandler;
@@ -66,6 +67,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
                 .findFragmentById(R.id.map);
         playerMarkers = new ConcurrentLinkedQueue<Marker>();
         capturePoints = new HashMap<Marker, CapturePoint>();
+        capturePointArray = new ArrayList<CapturePoint>();
         mapFragment.getMapAsync(this);
         mGoogleApiClient = new Builder(getActivity())
                 .addConnectionCallbacks(this)
@@ -180,6 +182,25 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         Log.d(TAG, "Map is Ready");
         mMap = map;
         mMap.setOnMarkerClickListener(this);
+        if(capturePoints.isEmpty())
+        {
+            for (CapturePoint point : capturePointArray) {
+                //capturePointList.add(point);
+                float color;
+                if (point.getState() == CapturePoint.State.BLUE)
+                    color = BitmapDescriptorFactory.HUE_AZURE;
+                else if (point.getState() == CapturePoint.State.RED)
+                    color = BitmapDescriptorFactory.HUE_RED;
+                else
+                    color = BitmapDescriptorFactory.HUE_GREEN;
+                Marker captureMarker = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
+                        icon(BitmapDescriptorFactory.defaultMarker(color))
+                        .title(point.getName()));
+                capturePoints.put(captureMarker, point);
+                Log.d("debug", capturePoints.toString());
+
+            }
+        }
     }
 
     @Override
@@ -217,16 +238,27 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
      */
     public void populateCapturePoints(ArrayList<CapturePoint> capturePointList)
     {
-        for(CapturePoint point: capturePointList)
-        {
-            // TODO(david): color marker based on color of point
-            //capturePointList.add(point);
-            Marker captureMarker = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
-                    icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-                    .title(point.getName()));
-            capturePoints.put(captureMarker, point);
-            Log.d("debug", capturePoints.toString());
+        Log.d("debug", "Capture Points Received");
+        for (CapturePoint point : capturePointList) {
+            capturePointArray.add(point);
+        }
+        if (mMap != null) {
+            for (CapturePoint point : capturePointList) {
+                //capturePointList.add(point);
+                float color;
+                if (point.getState() == CapturePoint.State.BLUE)
+                    color = BitmapDescriptorFactory.HUE_AZURE;
+                else if (point.getState() == CapturePoint.State.RED)
+                    color = BitmapDescriptorFactory.HUE_RED;
+                else
+                    color = BitmapDescriptorFactory.HUE_GREEN;
+                Marker captureMarker = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
+                        icon(BitmapDescriptorFactory.defaultMarker(color))
+                        .title(point.getName()));
+                capturePoints.put(captureMarker, point);
+                Log.d("debug", capturePoints.toString());
 
+            }
         }
     }
 
@@ -267,22 +299,19 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     }
     public boolean onMarkerClick(Marker marker) {
 
-        // TODO(david): register listener
         if(capturePoints.keySet().contains(marker))
         {
             // Send message to server requesting capture
             LatLng pointLocation = capturePoints.get(marker).getLocation();
-            float distance[] = new float[1];
-            Location.distanceBetween(mLastLocation.latitude, pointLocation.longitude,
-                    mLastLocation.latitude, pointLocation.longitude, distance);
+            // TODO(david): Calculate distance between points
+            float distance = 30;
+            /*Location.distanceBetween(mLastLocation.latitude, pointLocation.longitude,
+                    mLastLocation.latitude, pointLocation.longitude, distance);*/
             if(networkHandler != null) {
-                if (distance != null) {
-                    if (distance[0] < 50) {
+                    if (distance < 50) {
                         // Send the capture message
                         networkHandler.capturePoint(username, capturePoints.get(marker).getName());
                     }
-
-                }
             }
             else
             {

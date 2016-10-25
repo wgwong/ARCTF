@@ -67,7 +67,7 @@ public class NetworkClient extends Fragment {
         mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
         mSocket.on("session", onEstablishSession);
         mSocket.on("playerUpdate_confirm", onUpdate);
-        mSocket.on("gameStatusUpdate", receiveCapturePoints);
+        mSocket.on("gameStatusPopulate", receiveCapturePoints);
         mSocket.connect();
 
         Log.d("debug", "mf oncreate finish");
@@ -258,12 +258,12 @@ public class NetworkClient extends Fragment {
 
 
 
-    public void establishSession() {
+    public void establishSession(String username) {
         Log.d("debug", "establish session called");
         if (mSocket == null) {
             Log.d("debug", "why is msocket null when establishsession is called");
         }
-        mSocket.emit("session", "hello world");
+        mSocket.emit("session", username);
         Log.d("debug", "establish session: emitted message");
     }
 
