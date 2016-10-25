@@ -96,7 +96,7 @@ var Messagebase = (function Messagebase() {
 
 				setTimeout(function(){}, 3000);
 
-				io.emit("gameStatusUpdate", captureData);
+				io.emit("gameStatusPopulate", captureData);
 			});
 
 			socket.on('playerUpdate', function(data) {
