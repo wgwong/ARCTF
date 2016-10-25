@@ -1,10 +1,3 @@
-//var User = require('./models/schema').User;
-
-//var loggedInUsers = {};
-
-//var messages = {}; //key = target_user, value = dictionary where key = src, value = array of message tuples (msg, date, self?) including self, msg
-
-
 userData = {};
 /*
 	key = userKey
@@ -59,6 +52,12 @@ var Messagebase = (function Messagebase() {
 			'coordinates': [42.357242, -71.095119],
 			'lastCaptured': new Date()
 		}
+
+		captureData['e'] = {
+			'ownedBy': null,
+			'coordinates': [42.359613, -71.091231],
+			'lastCaptured': new Date()
+		}
 		teams["red"] = {};
 		teams["blue"] = {};
 	}
@@ -78,30 +77,31 @@ var Messagebase = (function Messagebase() {
 
 			//on initial connection, create player data
 			//then send current state of the game
-			socket.on('session', function(data){
-				console.log("new phone connected: ", data);
+			socket.on('session', function(player){
+				console.log("new phone connected: ", player);
 
 				teamAssignment = "";
 				if (teams["blue"].length <= teams["red"].length) {
 					teamAssignment = "blue";
-					teams["blue"][data.player] = true;
+					teams["blue"][player] = true;
 				}
 				else {
 					teamAssignment = "red";
-					teams["red"][data.player] = true;;
+					teams["red"][player] = true;;
 				}
 
-				userData[data.player] = {'name': 'test', 'team': teamAssignment, 'coordinates': []};
+				userData[player] = {'name': player, 'team': teamAssignment, 'coordinates': []};
 
 				console.log("team assignments: ", teams);
 
+				setTimeout(function(){}, 3000);
 
-				io.emit("gameStatusUpdate", captureData);
+				io.emit("gameStatusPopulate", captureData);
 			});
 
 			socket.on('playerUpdate', function(data) {
 				console.log("playerUpdate called, data: ", data);
-				player = data.address;
+				player = data.player;
 				latitude = data.latitude;
 				longitude = data.longitude;
 
@@ -166,64 +166,6 @@ var Messagebase = (function Messagebase() {
 			}
 		}, 20000);
 
-	}
-
-	that.login = function(username) {
-		loggedInUsers[username] = true;
-		if (io) {
-			io.emit("login user", username);
-		}
-	}
-
-	that.logout =  function(username) {
-		loggedInUsers[username] = false;
-		if (io) {
-			io.emit("logout user", username);
-		}
-	}
-
-	that.getActiveUsers = function() {
-		return loggedInUsers;
-	}
-
-	that.getOfflineUsers = function(cb) {
-		User.getAllUsers(function(err, result) {
-			if (err) {
-				console.error(err);
-				cb(err);
-			} else {
-				if (result.length > 0) {
-					var userList;
-					if (result.length > 1) {
-						userList = result.reduce(function(prev, cur, i, arr) {
-							if (i == 1) {
-								return [prev.username, cur.username]
-							} else {
-								return prev.concat(cur.username);
-							}
-						});
-					} else {
-						userList = [result[0].username];
-					}
-					var offlineUsers = userList.filter(function(user) {
-						return Object.keys(loggedInUsers).indexOf(user) === -1 || !loggedInUsers[user];
-					});
-					cb(null, offlineUsers);
-				} else {
-					cb(null, []);
-				}
-			}
-		});
-	}
-
-	//get all messages associated with the specified user
-	that.getMessagesByUsername = function(username) {
-
-		if (Object.keys(messages).indexOf(username) !== -1) {
-			return messages[username];
-		} else {
-			return {};
-		}
 	}
 
 	Object.freeze(that); //prevent any further modifications to the member fields and methods of this class
