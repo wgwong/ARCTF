@@ -15,6 +15,7 @@
     "ejs": "*",
     "express": "^4.14.0",
     "express-session": "*",
+    "external-ip": "^*",
     "mocha": "^*",
     "mongoose": "^*",
     "morgan": "~1.2.3",
