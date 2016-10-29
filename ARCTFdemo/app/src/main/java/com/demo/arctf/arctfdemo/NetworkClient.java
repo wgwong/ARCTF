@@ -69,6 +69,7 @@ public class NetworkClient extends Fragment {
         mSocket.on("playerUpdate_confirm", onUpdate);
         mSocket.on("gameStatusPopulate", receiveCapturePoints);
         mSocket.on("gameStatusUpdate", updateGameStatus);
+        mSocket.on("scoreUpdate", updateScore);
         mSocket.connect();
 
         Log.d("debug", "mf oncreate finish");
@@ -177,6 +178,32 @@ public class NetworkClient extends Fragment {
         }
     };
 
+    //TODO(david): update score json
+    private Emitter.Listener updateScore = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d("JSON", args[0].toString());
+                    JSONObject data = (JSONObject) args[0];
+                    String blue = "blue";
+                    String red = "red";
+                    try {
+                        Integer redScore = (Integer) data.get(red);
+                        Integer blueScore = (Integer) data.get(blue);
+                        Toast.makeText(getActivity().getApplicationContext(),
+                            "Blue Score: " + blueScore + " Red Score: " + redScore, Toast.LENGTH_LONG).show();
+                    }
+                    catch(JSONException ex){
+                        ex.printStackTrace();
+                    }
+
+                }
+            });
+        }
+    };
+
     private Emitter.Listener onUpdate = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
@@ -196,6 +223,8 @@ public class NetworkClient extends Fragment {
                             JSONObject player = (JSONObject) data.get(key);
                             JSONArray coordinates = (JSONArray) player.get("coordinates");
                             ArrayList<LatLng> locations = new ArrayList<LatLng>();
+
+                            // TODO(david): Handle team colors - player.get("team")
                             for(int i=0; i < coordinates.length(); i++)
                             {
                                 JSONArray latlng = (JSONArray) coordinates.get(i);
