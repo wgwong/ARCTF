@@ -68,6 +68,7 @@ public class NetworkClient extends Fragment {
         mSocket.on("session", onEstablishSession);
         mSocket.on("playerUpdate_confirm", onUpdate);
         mSocket.on("gameStatusPopulate", receiveCapturePoints);
+        mSocket.on("gameStatusUpdate", updateGameStatus);
         mSocket.connect();
 
         Log.d("debug", "mf oncreate finish");
@@ -198,6 +199,8 @@ public class NetworkClient extends Fragment {
                             for(int i=0; i < coordinates.length(); i++)
                             {
                                 JSONArray latlng = (JSONArray) coordinates.get(i);
+                                // TODO(david): Handle null case
+                                //if(latlng.get(0) == null || latlng.get(1) == null)
                                 locations.add(i,new LatLng((double)latlng.get(0),(double)latlng.get(1)) );
                             }
                             playerLocations.put(key, locations);
@@ -256,6 +259,49 @@ public class NetworkClient extends Fragment {
         }
     };
 
+    private Emitter.Listener updateGameStatus = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d("debug", "receiving capture points");
+                    Log.d("JSON", args[0].toString());
+                    NetworkHandler networkHandler = (NetworkHandler) getActivity();
+                    JSONObject data = (JSONObject) args[0];
+                    Iterator<String> keys = data.keys();
+                    ArrayList<CapturePoint> capturePoints = new ArrayList<CapturePoint>();
+                    while( keys.hasNext() ) {
+                        String key = (String)keys.next();
+                        try
+                        {
+                            JSONObject point = (JSONObject) data.get(key);
+                            String owner = point.get("ownedBy").toString();
+                            CapturePoint.State currentState = CapturePoint.State.NEUTRAL;
+                            if(owner == "blue")
+                                currentState = CapturePoint.State.BLUE;
+                            else if (owner == "red")
+                                currentState = CapturePoint.State.RED;
+                            JSONArray coordinates = (JSONArray) point.get("coordinates");
+                            LatLng latlng = new LatLng((double)coordinates.get(0),(double)coordinates.get(1));
+
+                            CapturePoint pt = new CapturePoint(latlng, key);
+                            pt.setState(currentState);
+                            capturePoints.add(pt);
+                        }
+                        catch(JSONException ex){
+                            ex.printStackTrace();
+                        }
+                    }
+                    // SEND list of points to network handler which has function to update map
+                    // TODO(david): call new function to change capture point colors
+                    networkHandler.updateGameState(capturePoints);
+
+                }
+            });
+        }
+    };
+
 
 
     public void establishSession(String username) {
@@ -283,7 +329,7 @@ public class NetworkClient extends Fragment {
         }
 
         mSocket.emit("capture", captureRequest);
-        Log.d("debug", "playerUpdate sent");
+        Log.d("debug", "capture message sent");
     }
 
 }

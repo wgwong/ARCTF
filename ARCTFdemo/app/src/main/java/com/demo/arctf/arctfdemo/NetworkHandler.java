@@ -83,7 +83,7 @@ public class NetworkHandler extends AppCompatActivity {
             jsonObj.put("player", username);
             jsonObj.put("capturePoint", pointName);
             Log.d("Message", "Sending Capture Request Server");
-            networkClient.updateLocation(jsonObj);
+            networkClient.capturePoint(jsonObj);
         } catch (JSONException ex) {
             ex.printStackTrace();
         }
@@ -108,5 +108,10 @@ public class NetworkHandler extends AppCompatActivity {
     public void populateCapturePoints(ArrayList<CapturePoint> capturePoints)
     {
         playerMap.populateCapturePoints(capturePoints);
+    }
+
+    public void updateGameState(ArrayList<CapturePoint> capturePointList)
+    {
+        playerMap.updateGameState(capturePointList);
     }
 }

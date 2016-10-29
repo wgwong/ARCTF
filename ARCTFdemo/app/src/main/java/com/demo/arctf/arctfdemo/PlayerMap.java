@@ -51,6 +51,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     private String username;
     private CapturePoint.State team;
     private HashMap<Marker, CapturePoint> capturePoints;
+    private HashMap<String, Marker> capturePointMarkers;
     private ArrayList<CapturePoint> capturePointArray;
     private Queue<Marker> playerMarkers;
     private Marker playerLocation;
@@ -67,6 +68,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
                 .findFragmentById(R.id.map);
         playerMarkers = new ConcurrentLinkedQueue<Marker>();
         capturePoints = new HashMap<Marker, CapturePoint>();
+        capturePointMarkers = new HashMap<String, Marker>();
         capturePointArray = new ArrayList<CapturePoint>();
         mapFragment.getMapAsync(this);
         mGoogleApiClient = new Builder(getActivity())
@@ -197,6 +199,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
                         icon(BitmapDescriptorFactory.defaultMarker(color))
                         .title(point.getName()));
                 capturePoints.put(captureMarker, point);
+                capturePointMarkers.put(point.getName(), captureMarker);
                 Log.d("debug", capturePoints.toString());
 
             }
@@ -232,7 +235,32 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         return mLastLocation;
     }
 
-
+    /**
+     * Updates color of capture points
+     */
+    public void updateGameState(ArrayList<CapturePoint> capturePointList)
+    {
+        for(CapturePoint point: capturePointList)
+        {
+            String name = point.getName();
+            if (capturePointMarkers.keySet().contains(name))
+            {
+                Marker tempMarker = capturePointMarkers.get(name);
+                tempMarker.remove();
+                float color;
+                if (point.getState() == CapturePoint.State.BLUE)
+                    color = BitmapDescriptorFactory.HUE_AZURE;
+                else if (point.getState() == CapturePoint.State.RED)
+                    color = BitmapDescriptorFactory.HUE_RED;
+                else
+                    color = BitmapDescriptorFactory.HUE_GREEN;
+                tempMarker = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
+                        icon(BitmapDescriptorFactory.defaultMarker(color))
+                        .title(point.getName()));
+                // TODO(david): Figure out if this is a reference modified or if must remove and reput to both stored arrays
+            }
+        }
+    }
     /*
      * Adds capture points to map
      */
@@ -256,6 +284,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
                         icon(BitmapDescriptorFactory.defaultMarker(color))
                         .title(point.getName()));
                 capturePoints.put(captureMarker, point);
+                capturePointMarkers.put(point.getName(), captureMarker);
                 Log.d("debug", capturePoints.toString());
 
             }
@@ -302,7 +331,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         if(capturePoints.keySet().contains(marker))
         {
             // Send message to server requesting capture
-            LatLng pointLocation = capturePoints.get(marker).getLocation();
+            //LatLng pointLocation = capturePoints.get(marker).getLocation();
             // TODO(david): Calculate distance between points
             float distance = 30;
             /*Location.distanceBetween(mLastLocation.latitude, pointLocation.longitude,
@@ -318,7 +347,8 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
                 throw new NullPointerException("Network Handler is undefined in PlayerMap");
             }
         }
-        return false;
+        Log.d("debug", "Finish capture");
+        return true;
     }
 
     public void capturePoint(CapturePoint.State state)

@@ -55,4 +55,9 @@ public class MapFragConnector extends Fragment {
     {
         mapFragment.setNetworkHandler(handler);
     }
+
+    public void updateGameState(ArrayList<CapturePoint> capturePointList)
+    {
+        mapFragment.updateGameState(capturePointList);
+    }
 }
