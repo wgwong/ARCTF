@@ -79,12 +79,14 @@ public class NetworkHandler extends AppCompatActivity {
     }
     public void capturePoint(String username, String pointName) {
         JSONObject jsonObj = new JSONObject();
+        Log.d("debug", "INSIDE CAPTURE POINT NETWORK HANDLER");
         try {
             jsonObj.put("player", username);
             jsonObj.put("capturePoint", pointName);
-            Log.d("Message", "Sending Capture Request Server");
+            Log.d("debug", "Sending Capture Request Server");
             networkClient.capturePoint(jsonObj);
         } catch (JSONException ex) {
+            Log.d("debug", "Capture Request Exception");
             ex.printStackTrace();
         }
     }

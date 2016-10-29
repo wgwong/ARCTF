@@ -240,6 +240,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
      */
     public void updateGameState(ArrayList<CapturePoint> capturePointList)
     {
+        Log.d("debug", "Update Game State");
         for(CapturePoint point: capturePointList)
         {
             String name = point.getName();
@@ -249,6 +250,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
             {
                 Marker tempMarker = capturePointMarkers.get(name);
                 tempMarker.remove();
+
                 float color;
                 if (point.getState() == CapturePoint.State.BLUE) {
                     color = BitmapDescriptorFactory.HUE_AZURE;
@@ -265,7 +267,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
                 tempMarker = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
                         icon(BitmapDescriptorFactory.defaultMarker(color))
                         .title(point.getName()));
-                // TODO(david): Figure out if this is a reference modified or if must remove and reput to both stored arrays
+                Log.d("marker", "New Marker Color contained: " + capturePoints.keySet().contains(tempMarker));
             }
         }
     }
@@ -338,6 +340,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     }
     public boolean onMarkerClick(Marker marker) {
 
+        Log.d("debug", "On Marker Click Called");
         if(capturePoints.keySet().contains(marker))
         {
             // Send message to server requesting capture
@@ -349,6 +352,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
             if(networkHandler != null) {
                     if (distance < 50) {
                         // Send the capture message
+                        Log.d("MarkerCapture", "Capturing point in On Marker Click");
                         networkHandler.capturePoint(username, capturePoints.get(marker).getName());
                     }
             }
