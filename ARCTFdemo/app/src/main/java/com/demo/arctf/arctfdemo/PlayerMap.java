@@ -249,6 +249,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
             if (capturePointMarkers.keySet().contains(name))
             {
                 Marker tempMarker = capturePointMarkers.get(name);
+                CapturePoint tempPoint = capturePoints.get(tempMarker);
                 tempMarker.remove();
 
                 float color;
@@ -267,6 +268,8 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
                 tempMarker = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
                         icon(BitmapDescriptorFactory.defaultMarker(color))
                         .title(point.getName()));
+                capturePoints.put(tempMarker, tempPoint);
+                capturePointMarkers.put(name, tempMarker);
                 Log.d("marker", "New Marker Color contained: " + capturePoints.keySet().contains(tempMarker));
             }
         }
