@@ -315,9 +315,11 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
             if (name != username)
             {
                 ArrayList<LatLng> locationArray = playerLocations.get(name);
-                LatLng lastLocation = locationArray.get(locationArray.size()-1);
-                Marker loc = mMap.addMarker(new MarkerOptions().position(lastLocation).title(name));
-                playerMarkers.add(loc);
+                if(locationArray.size() >0) {
+                    LatLng lastLocation = locationArray.get(locationArray.size() - 1);
+                    Marker loc = mMap.addMarker(new MarkerOptions().position(lastLocation).title(name));
+                    playerMarkers.add(loc);
+                }
             }
         }
     }
