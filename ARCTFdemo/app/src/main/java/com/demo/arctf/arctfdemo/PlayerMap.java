@@ -130,7 +130,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
              playerLocation.remove();
          }
          playerLocation = mMap.addMarker(new MarkerOptions().position(newLoc).title(username));
-         mMap.moveCamera(CameraUpdateFactory.newLatLng(newLoc));
+         //mMap.moveCamera(CameraUpdateFactory.newLatLng(newLoc));
         }
     }
 
@@ -243,17 +243,25 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         for(CapturePoint point: capturePointList)
         {
             String name = point.getName();
+            Log.d("debug", name);
+
             if (capturePointMarkers.keySet().contains(name))
             {
                 Marker tempMarker = capturePointMarkers.get(name);
                 tempMarker.remove();
                 float color;
-                if (point.getState() == CapturePoint.State.BLUE)
+                if (point.getState() == CapturePoint.State.BLUE) {
                     color = BitmapDescriptorFactory.HUE_AZURE;
-                else if (point.getState() == CapturePoint.State.RED)
+                    Log.d("debug", "New Color: Blue");
+                }
+                else if (point.getState() == CapturePoint.State.RED) {
                     color = BitmapDescriptorFactory.HUE_RED;
-                else
+                    Log.d("debug", "New Color: Red");
+                }
+                else {
                     color = BitmapDescriptorFactory.HUE_GREEN;
+                    Log.d("debug", "New Color: Green");
+                }
                 tempMarker = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
                         icon(BitmapDescriptorFactory.defaultMarker(color))
                         .title(point.getName()));
@@ -353,8 +361,4 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         return true;
     }
 
-    public void capturePoint(CapturePoint.State state)
-    {
-        // Set state of capture point to team who has captured
-    }
 }

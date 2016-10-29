@@ -277,10 +277,11 @@ public class NetworkClient extends Fragment {
                         {
                             JSONObject point = (JSONObject) data.get(key);
                             String owner = point.get("ownedBy").toString();
+                            Log.d("debug", "Owned by "+ owner);
                             CapturePoint.State currentState = CapturePoint.State.NEUTRAL;
-                            if(owner == "blue")
+                            if(owner.equals("blue"))
                                 currentState = CapturePoint.State.BLUE;
-                            else if (owner == "red")
+                            else if (owner.equals("red"))
                                 currentState = CapturePoint.State.RED;
                             JSONArray coordinates = (JSONArray) point.get("coordinates");
                             LatLng latlng = new LatLng((double)coordinates.get(0),(double)coordinates.get(1));
