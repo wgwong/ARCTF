@@ -144,7 +144,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
             if(playerLocation!=null)
                 playerLocation.remove();
             playerLocation = mMap.addMarker(new MarkerOptions().position(newLoc).title(username));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newLoc,14));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newLoc,16));
         }
     }
 
