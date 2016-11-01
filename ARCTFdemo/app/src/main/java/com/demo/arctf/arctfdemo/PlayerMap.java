@@ -129,7 +129,8 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
          if (playerLocation != null) {
              playerLocation.remove();
          }
-         playerLocation = mMap.addMarker(new MarkerOptions().position(newLoc).title(username));
+         playerLocation = mMap.addMarker(new MarkerOptions().position(newLoc)
+                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)).title(username));
          //mMap.moveCamera(CameraUpdateFactory.newLatLng(newLoc));
         }
     }
@@ -330,7 +331,8 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
                 ArrayList<LatLng> locationArray = playerLocations.get(name);
                 if(locationArray.size() >0) {
                     LatLng lastLocation = locationArray.get(locationArray.size() - 1);
-                    Marker loc = mMap.addMarker(new MarkerOptions().position(lastLocation).title(name));
+                    Marker loc = mMap.addMarker(new MarkerOptions().position(lastLocation)
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)).title(name));
                     playerMarkers.add(loc);
                 }
             }
