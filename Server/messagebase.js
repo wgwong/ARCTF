@@ -20,6 +20,11 @@ captureData = {};
 
 teams = {};
 
+teamScores = {};
+/*
+	key = team key
+	value = int for team score
+*/
 
 var Messagebase = (function Messagebase() {
 	var that = Object.create(Messagebase.prototype);
@@ -58,8 +63,17 @@ var Messagebase = (function Messagebase() {
 			'coordinates': [42.359613, -71.091231],
 			'lastCaptured': new Date()
 		}
+
+		captureData['f'] = {
+			'ownedBy': null,
+			'coordinates': [42.363231, -71.099789],
+			'lastCaptured': new Date()
+		}
+
 		teams["red"] = {};
 		teams["blue"] = {};
+		teamScores["red"] = 0;
+		teamScores["blue"] = 0;
 	}
 
 	that.setIO = function(IO) {
@@ -81,14 +95,26 @@ var Messagebase = (function Messagebase() {
 				console.log("new phone connected: ", player);
 
 				teamAssignment = "";
-				if (teams["blue"].length <= teams["red"].length) {
+
+				if (Object.keys(teams["red"]).length <= Object.keys(teams["blue"]).length) {
+					teamAssignment = "red";
+					teams["red"][player] = true;
+
+				}
+				else {
+					teamAssignment = "blue";
+					teams["blue"][player] = true;
+				}
+
+				/*
+				if (Object.keys(teams["blue"]).length <= Object.keys(teams["red"]).length) {
 					teamAssignment = "blue";
 					teams["blue"][player] = true;
 				}
 				else {
 					teamAssignment = "red";
-					teams["red"][player] = true;;
-				}
+					teams["red"][player] = true;
+				}*/
 
 				userData[player] = {'name': player, 'team': teamAssignment, 'coordinates': []};
 
@@ -96,11 +122,15 @@ var Messagebase = (function Messagebase() {
 
 				setTimeout(function(){}, 3000);
 
+				console.log("first session: capture data: ", captureData); //debug
+				console.log("first sessiion: team scores now: ", teamScores); //debug
+
 				io.emit("gameStatusPopulate", captureData);
+				io.emit("scoreUpdate", teamScores);
 			});
 
 			socket.on('playerUpdate', function(data) {
-				console.log("playerUpdate called, data: ", data);
+				//console.log("playerUpdate called, data: ", data);
 				player = data.player;
 				latitude = data.latitude;
 				longitude = data.longitude;
@@ -117,7 +147,7 @@ var Messagebase = (function Messagebase() {
 				userData[player]['timestamp'] = new Date();
 
 				//DEBUG
-				console.log("emitting: ", userData);
+				//console.log("emitting: ", userData);
 				io.emit("playerUpdate_confirm", userData);
 			});
 
@@ -129,22 +159,50 @@ var Messagebase = (function Messagebase() {
 
 				now = new Date();
 
-				if (now - capturePointKey['lastCaptured'] > 30000) {
+				console.log("this is now: ", now); //debug
+				console.log("this is lastcaptured: ", captureData[capturePointKey]['lastCaptured']); //debug
+
+				console.log("?", now - captureData[capturePointKey]['lastCaptured']); //debug				
+
+				if (now - captureData[capturePointKey]['lastCaptured'] > /*30000*/ 1000) {
+
+					console.log("after 1 second"); //debug
 
 					if (captureData[capturePointKey]['ownedBy'] == null) {
-						captureData[capturePointKey]['ownedBy'] = playerTimestamp;
+
+						console.log("neutral flag"); //debug
+
+						captureData[capturePointKey]['ownedBy'] = userData[player]['team'];
 						captureData[capturePointKey]['lastCaptured'] = now;
+
+						teamScores[userData[player]['team']] += 1;
+
+						console.log("capture data now: ", captureData); //debug
+						console.log("team scores now: ", teamScores); //debug
+
 						io.emit("gameStatusUpdate", captureData); //only run this on success
+						io.emit("scoreUpdate", teamScores);
 					}
 					else {
 						//handle logic regarding team battle over a spawnpoint
 						
-						
+						console.log("someone else had this flag before we took it"); //debug
 
 						//if successful
-						captureData[capturePointKey]['ownedBy'] = playerTimestamp;
+
+						teamScores[captureData[capturePointKey]['ownedBy']] -= 1;
+
+						captureData[capturePointKey]['ownedBy'] = userData[player]['team'];
 						captureData[capturePointKey]['lastCaptured'] = now;
+
+						teamScores[userData[player]['team']] += 1;
+
+
+						console.log("capture data now: ", captureData); //debug
+						console.log("team scores now: ", teamScores); //debug
+
 						io.emit("gameStatusUpdate", captureData); //only run this on success
+						io.emit("scoreUpdate", teamScores);
 					}
 				}
 			});
@@ -153,7 +211,7 @@ var Messagebase = (function Messagebase() {
 
 		
 		setInterval( function() {
-			io.emit("session", "this is a timed message " + userData);
+			//io.emit("session", "this is a timed message " + userData);
 		}, 5000); // 1000 = 1 sec
 
 		setInterval( function() {
