@@ -1,0 +1,21 @@
+show everyone on map
+
+first person to click on capture point within radius sends the initial capture request
+
+this starts the timer on the server side
+
+variables:
+	timer: remaining time
+	team: which team is capturing
+
+other players can chime in by clicking on the capture point
+
+server side:
+	while 5 seconds not over
+	check numbers for both teams
+		check if they left, if they have, then remove them from the capturing count for that team
+	if more numbers on other side, reset timer, and team variable
+		and update every player
+
+	update every player the state of the capture point(s) every half second or so
+
