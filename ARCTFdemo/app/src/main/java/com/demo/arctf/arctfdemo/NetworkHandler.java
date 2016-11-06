@@ -29,7 +29,7 @@ public class NetworkHandler extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Sending reference to PlayerMap
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_frame);
         uniqueID = UUID.randomUUID().toString();
         connectToServer();
         Log.d("debug", "networkhandler oncreate called");
@@ -56,9 +56,10 @@ public class NetworkHandler extends AppCompatActivity {
     /**
      * @param playerLocations hashmap of mac addresses to list of latitude and longitude of each player
      */
-    public void updateMap(HashMap<String, ArrayList<LatLng>> playerLocations)
+    public void updateMap(HashMap<String, ArrayList<LatLng>> playerLocations,
+                          HashMap<String,CapturePoint.State> playerTeams)
     {
-        playerMap.updateMap(playerLocations);
+        playerMap.updateMap(playerLocations, playerTeams);
     }
 
     private void updateServer()

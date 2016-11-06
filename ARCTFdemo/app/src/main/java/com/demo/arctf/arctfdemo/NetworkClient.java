@@ -216,6 +216,7 @@ public class NetworkClient extends Fragment {
                     JSONObject data = (JSONObject) args[0];
                     Iterator<String> keys = data.keys();
                     HashMap<String,ArrayList<LatLng>> playerLocations = new HashMap<String, ArrayList<LatLng>>();
+                    HashMap<String,CapturePoint.State> playerTeams = new HashMap<String,CapturePoint.State>();
                     while( keys.hasNext() ) {
                         String key = (String)keys.next();
                         try
@@ -223,8 +224,8 @@ public class NetworkClient extends Fragment {
                             JSONObject player = (JSONObject) data.get(key);
                             JSONArray coordinates = (JSONArray) player.get("coordinates");
                             ArrayList<LatLng> locations = new ArrayList<LatLng>();
-
                             // TODO(david): Handle team colors - player.get("team")
+                            String color =(String) player.get("team");
                             for(int i=0; i < coordinates.length(); i++)
                             {
                                 JSONArray latlng = (JSONArray) coordinates.get(i);
@@ -233,12 +234,18 @@ public class NetworkClient extends Fragment {
                                 locations.add(i,new LatLng((double)latlng.get(0),(double)latlng.get(1)) );
                             }
                             playerLocations.put(key, locations);
+                            CapturePoint.State team = CapturePoint.State.NEUTRAL;
+                            if(color.equals("blue"))
+                                team = CapturePoint.State.BLUE;
+                            else if(color.equals("red"))
+                                team = CapturePoint.State.RED;
+                            playerTeams.put(key, team);
                         }
                         catch(JSONException ex){
                             ex.printStackTrace();
                         }
                     }
-                    networkHandler.updateMap(playerLocations);
+                    networkHandler.updateMap(playerLocations, playerTeams);
                    // {"undefined":{"name":"test","team":"gray","coordinates":[[42.357999,-71.0933371],
 
                 }

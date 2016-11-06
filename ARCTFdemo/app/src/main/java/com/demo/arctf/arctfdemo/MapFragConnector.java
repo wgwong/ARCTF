@@ -41,9 +41,10 @@ public class MapFragConnector extends Fragment {
         return mapFragment.getLastKnownLatLng();
     }
 
-    public void updateMap(HashMap<String, ArrayList<LatLng>> playerLocations)
+    public void updateMap(HashMap<String, ArrayList<LatLng>> playerLocations,
+                          HashMap<String,CapturePoint.State> playerTeams)
     {
-        mapFragment.updateMap(playerLocations);
+        mapFragment.updateMap(playerLocations, playerTeams);
     }
 
     public void populateCapturePoints(ArrayList<CapturePoint> capturePoints)

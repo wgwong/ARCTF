@@ -3,6 +3,8 @@ package com.demo.arctf.arctfdemo;
 import android.app.Fragment;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Icon;
 import android.location.Location;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -26,6 +28,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -130,7 +133,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
              playerLocation.remove();
          }
          playerLocation = mMap.addMarker(new MarkerOptions().position(newLoc)
-                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)).title(username));
+                 .icon(BitmapDescriptorFactory.fromResource(R.mipmap.player_orange_you)).title(username));
          //mMap.moveCamera(CameraUpdateFactory.newLatLng(newLoc));
         }
     }
@@ -144,7 +147,8 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         if(mMap != null) {
             if(playerLocation!=null)
                 playerLocation.remove();
-            playerLocation = mMap.addMarker(new MarkerOptions().position(newLoc).title(username));
+            playerLocation = mMap.addMarker(new MarkerOptions().position(newLoc).title(username)
+                    .icon(BitmapDescriptorFactory.fromResource(R.mipmap.player_orange_you)));
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newLoc,16));
         }
     }
@@ -189,15 +193,11 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         {
             for (CapturePoint point : capturePointArray) {
                 //capturePointList.add(point);
-                float color;
-                if (point.getState() == CapturePoint.State.BLUE)
-                    color = BitmapDescriptorFactory.HUE_AZURE;
-                else if (point.getState() == CapturePoint.State.RED)
-                    color = BitmapDescriptorFactory.HUE_RED;
-                else
-                    color = BitmapDescriptorFactory.HUE_GREEN;
+                BitmapDescriptor icon;
+                CapturePoint.State team = point.getState();
+                icon = getMarkerIcon(team, true);
                 Marker captureMarker = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
-                        icon(BitmapDescriptorFactory.defaultMarker(color))
+                        icon(icon)
                         .title(point.getName()));
                 capturePoints.put(captureMarker, point);
                 capturePointMarkers.put(point.getName(), captureMarker);
@@ -253,21 +253,9 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
                 CapturePoint tempPoint = capturePoints.get(tempMarker);
                 tempMarker.remove();
 
-                float color;
-                if (point.getState() == CapturePoint.State.BLUE) {
-                    color = BitmapDescriptorFactory.HUE_AZURE;
-                    Log.d("debug", "New Color: Blue");
-                }
-                else if (point.getState() == CapturePoint.State.RED) {
-                    color = BitmapDescriptorFactory.HUE_RED;
-                    Log.d("debug", "New Color: Red");
-                }
-                else {
-                    color = BitmapDescriptorFactory.HUE_GREEN;
-                    Log.d("debug", "New Color: Green");
-                }
-                tempMarker = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
-                        icon(BitmapDescriptorFactory.defaultMarker(color))
+                BitmapDescriptor icon = getMarkerIcon(point.getState(), true);
+                                tempMarker = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
+                        icon(icon)
                         .title(point.getName()));
                 capturePoints.put(tempMarker, tempPoint);
                 capturePointMarkers.put(name, tempMarker);
@@ -287,15 +275,11 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         if (mMap != null) {
             for (CapturePoint point : capturePointList) {
                 //capturePointList.add(point);
-                float color;
-                if (point.getState() == CapturePoint.State.BLUE)
-                    color = BitmapDescriptorFactory.HUE_AZURE;
-                else if (point.getState() == CapturePoint.State.RED)
-                    color = BitmapDescriptorFactory.HUE_RED;
-                else
-                    color = BitmapDescriptorFactory.HUE_GREEN;
+                BitmapDescriptor icon;
+                CapturePoint.State team = point.getState();
+                icon = getMarkerIcon(team, true);
                 Marker captureMarker = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
-                        icon(BitmapDescriptorFactory.defaultMarker(color))
+                        icon(icon)
                         .title(point.getName()));
                 capturePoints.put(captureMarker, point);
                 capturePointMarkers.put(point.getName(), captureMarker);
@@ -320,19 +304,45 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
             }
         }
     }
-    public void updateMap(HashMap<String, ArrayList<LatLng>> playerLocations)
+
+    private BitmapDescriptor getMarkerIcon(CapturePoint.State team, Boolean isCapturePoint)
+    {
+        BitmapDescriptor markerIcon;
+        if(isCapturePoint) {
+            if (team == CapturePoint.State.BLUE)
+                markerIcon = BitmapDescriptorFactory.fromResource(R.mipmap.blue_capture_point);
+            else if (team == CapturePoint.State.RED)
+                markerIcon = BitmapDescriptorFactory.fromResource(R.mipmap.orange_capture_point);
+            else
+                markerIcon = BitmapDescriptorFactory.fromResource(R.mipmap.neutral_capture_point);
+            return markerIcon;
+        }
+        else {
+            if (team == CapturePoint.State.BLUE)
+                markerIcon = BitmapDescriptorFactory.fromResource(R.mipmap.player_blue_other);
+            else
+                markerIcon = BitmapDescriptorFactory.fromResource(R.mipmap.player_orange_other);
+            return markerIcon;
+        }
+    }
+
+    public void updateMap(HashMap<String, ArrayList<LatLng>> playerLocations,
+                          HashMap<String,CapturePoint.State> playerTeams)
     {
         Log.d("Update", "Updating Map");
         clearOtherPlayerMarkers();
         for(String name: playerLocations.keySet())
         {
-            if (name != username)
+            if (!name.equals(username))
             {
                 ArrayList<LatLng> locationArray = playerLocations.get(name);
                 if(locationArray.size() >0) {
                     LatLng lastLocation = locationArray.get(locationArray.size() - 1);
+                    BitmapDescriptor icon;
+                    CapturePoint.State team = playerTeams.get(name);
+                    icon = getMarkerIcon(team, false);
                     Marker loc = mMap.addMarker(new MarkerOptions().position(lastLocation)
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)).title(name));
+                            .icon(icon).title(name));
                     playerMarkers.add(loc);
                 }
             }
