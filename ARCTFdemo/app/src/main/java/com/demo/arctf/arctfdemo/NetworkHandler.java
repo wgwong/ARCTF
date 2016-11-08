@@ -156,4 +156,15 @@ public class NetworkHandler extends AppCompatActivity {
     {
         playerMap.updateGameState(capturePointList);
     }
+
+    public void setTeam(String team)
+    {
+        //TODO: In the future handle other cases by throwing an error
+        CapturePoint.State playerTeam;
+        if(team.equals("blue"))
+            playerTeam = CapturePoint.State.BLUE;
+        else
+            playerTeam = CapturePoint.State.RED;
+        playerMap.setTeam(playerTeam);
+    }
 }

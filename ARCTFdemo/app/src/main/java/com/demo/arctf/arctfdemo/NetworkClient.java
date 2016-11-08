@@ -70,6 +70,7 @@ public class NetworkClient extends Fragment {
         mSocket.on("gameStatusPopulate", receiveCapturePoints);
         mSocket.on("gameStatusUpdate", updateGameStatus);
         mSocket.on("scoreUpdate", updateScore);
+        mSocket.on("teamPopulate", setTeam);
         mSocket.connect();
 
         Log.d("debug", "mf oncreate finish");
@@ -178,6 +179,19 @@ public class NetworkClient extends Fragment {
         }
     };
 
+    private Emitter.Listener setTeam = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    String data = (String) args[0];
+                    NetworkHandler networkHandler = (NetworkHandler) getActivity();
+                    networkHandler.setTeam(data);
+                }
+            });
+        }
+    };
     //TODO(david): update score json
     private Emitter.Listener updateScore = new Emitter.Listener() {
         @Override

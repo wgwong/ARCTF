@@ -65,4 +65,9 @@ public class MapFragConnector extends Fragment {
     public boolean inCaptureRange(LatLng pointLocation){
         return mapFragment.inCaptureRange(pointLocation);
     }
+
+    public void setTeam(CapturePoint.State teamColor)
+    {
+        mapFragment.setTeam(teamColor);
+    }
 }
