@@ -88,7 +88,7 @@ public class NetworkHandler extends AppCompatActivity {
             @Override
             public void run() {
                 Log.d("Handler", "Calling Update Server");
-                if(playerMap.inCaptureRange(captureLocation)) {
+                if(playerMap.inCaptureRange(captureLocation) && !playerMap.alreadyCaptured(pointName)) {
                     sendCaptureRequest(username, pointName);
                     handler.postDelayed(this, 1000);
                 }

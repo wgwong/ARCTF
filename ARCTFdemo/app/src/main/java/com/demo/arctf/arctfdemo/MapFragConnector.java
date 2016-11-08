@@ -66,6 +66,9 @@ public class MapFragConnector extends Fragment {
         return mapFragment.inCaptureRange(pointLocation);
     }
 
+    public boolean alreadyCaptured(String pointName){
+        return mapFragment.alreadyCaptured(pointName);
+    }
     public void setTeam(CapturePoint.State teamColor)
     {
         mapFragment.setTeam(teamColor);

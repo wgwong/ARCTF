@@ -271,7 +271,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
                 Marker tempMarker = capturePointMarkers.get(name);
                 CapturePoint tempPoint = capturePoints.get(tempMarker);
                 tempMarker.remove();
-
+                tempPoint.setState(point.getState());
                 BitmapDescriptor icon = getMarkerIcon(point.getState(), true);
                                 tempMarker = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
                         icon(icon)
@@ -390,8 +390,23 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         }
         return false;
     }
-    public boolean onMarkerClick(Marker marker) {
 
+    public boolean alreadyCaptured(String pointName)
+    {
+        Log.d("EndCaptureRequest", "Checking if already captured");
+        Marker pointMarker = capturePointMarkers.get(pointName);
+        CapturePoint.State owner = capturePoints.get(pointMarker).getState();
+        Log.d("EndCaptureRequest", owner.toString());
+        Log.d("EndCaptureRequest", team.toString());
+        if (owner.equals(team))
+        {
+            Log.d("EndCaptureRequest", "Owner = team");
+            return true;
+        }
+        return false;
+    }
+    public boolean onMarkerClick(Marker marker) {
+        //TODO(david): IMPORTANT - Multiple clicks should not send a new capture request if it is already going
         Log.d("debug", "On Marker Click Called");
         if(capturePoints.keySet().contains(marker))
         {
