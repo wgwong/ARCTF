@@ -19,6 +19,10 @@ captureData = {};
 */
 
 teams = {};
+/*
+	key = team key
+	val = list of users in that team
+*/
 
 teamScores = {};
 /*
@@ -31,7 +35,8 @@ underCapture = {};
 	key = capture key, unique id for spawnpoint
 	val = {
 		team: {} //key = team name, val = # of people currently capturing it
-		timer: val //time when capture first started
+		startedBy: //val = team that started request
+		startTime: val //time when capture first started
 	}
 */
 
@@ -42,6 +47,13 @@ captureTimers = {};
 		team: {} //key = team name, val = # of people currently capturing it
 		timer: val //time 	
 	}
+*/
+
+captureAssignment = {};
+/*
+	maps player to their current capture assignment
+	key = player id
+	val = capture key
 */
 
 var Messagebase = (function Messagebase() {
@@ -144,9 +156,9 @@ var Messagebase = (function Messagebase() {
 				console.log("first session: capture data: ", captureData); //debug
 				console.log("first sessiion: team scores now: ", teamScores); //debug
 
+				io.emit("teamPopulate", teamAssignment);
 				io.emit("gameStatusPopulate", captureData);
 				io.emit("scoreUpdate", teamScores);
-				io.emit("teamUpdate", team);
 			});
 
 			socket.on('playerUpdate', function(data) {
@@ -179,11 +191,28 @@ var Messagebase = (function Messagebase() {
 				team = userData[player]['team'];
 
 
+				if (capturePointKey in underCapture && 'team' in underCapture[capturePointKey] && team in underCapture[capturePointKey]['team'] && player in underCapture[capturePointKey]['team'][team]) {
+					console.log("ignoring request");
+					return;
+				} else {
+					console.log("checking request");
+					console.log("capturePointKey in underCapture: ", capturePointKey in underCapture);
+					if (capturePointKey in underCapture) {
+						console.log("'team' in underCapture[capturePointKey]: ", 'team' in underCapture[capturePointKey]);
+						if ('team' in underCapture[capturePointKey]) {
+							console.log("team in underCapture[capturePointKey]['team']: ", team in underCapture[capturePointKey]['team']);
+							if (team in underCapture[capturePointKey]['team']) {
+								console.log("player in underCapture[capturePointKey]['team'][team]: ", player in underCapture[capturePointKey]['team'][team]);
+							}
+						}
+					}
+				}
+
 				//reject if their team has already captured it and it's not currently under attack by the opposite team
 				if (captureData[capturePointKey]['ownedBy'] === team &&
 					(!capturePointKey in underCapture ||
 						(capturePointKey in underCapture && captureTimers[capturePointKey] === null))) {
-					console.log("team already has it captured!");
+					console.log("team already captured/contesting it!");
 					return;
 				}
 
@@ -206,9 +235,10 @@ var Messagebase = (function Messagebase() {
 					}
 
 					if (!(team in underCapture[capturePointKey]['team'])) {
-						underCapture[capturePointKey]['team'][team] = 0;
+						underCapture[capturePointKey]['team'][team] = new Set();
 					}
-					underCapture[capturePointKey]['team'][team] += 1;
+					underCapture[capturePointKey]['team'][team].add(player);
+					console.log("adding player to list of players contesting the point")
 
 
 					function capturePoint() {
@@ -219,6 +249,10 @@ var Messagebase = (function Messagebase() {
 						}
 						captureData[capturePointKey]['ownedBy'] = team;
 						captureData[capturePointKey]['lastCaptured'] = new Date();
+						underCapture[capturePointKey] = {
+							'team': {},
+							'startTime': null
+						}
 
 						teamScores[userData[player]['team']] += 1;
 
@@ -257,7 +291,7 @@ var Messagebase = (function Messagebase() {
 						captureTimers[capturePointKey] = captureTimer;
 					}
 
-					if (underCapture[capturePointKey]['timer'] !== null) {
+					if (captureTimers[capturePointKey] !== null && captureTimers[capturePointKey] !== undefined) {
 						//TODO, helper function to get opposite team
 						oppositeTeam = null
 						if (team === 'red') {
@@ -266,16 +300,29 @@ var Messagebase = (function Messagebase() {
 							oppositeTeam = 'red';
 						}
 
-						if (underCapture[capturePointKey]['team'][team] > underCapture[capturePointKey]['team'][oppositeTeam]) {
+						if (!(oppositeTeam in underCapture[capturePointKey]['team'])) {
+							console.log("oppositeTeam set doesn't exist, creating");
+							underCapture[capturePointKey]['team'][oppositeTeam] = new Set();
+						}
+
+						console.log("our team count capture: ", underCapture[capturePointKey]['team'][team]);
+						console.log("opp team count capture: ", underCapture[capturePointKey]['team'][oppositeTeam]);
+
+						console.log("our team count capture: ", underCapture[capturePointKey]['team'][team].size);
+						console.log("opp team count capture: ", underCapture[capturePointKey]['team'][oppositeTeam].size);
+
+						if (underCapture[capturePointKey]['team'][team].size > underCapture[capturePointKey]['team'][oppositeTeam].size && underCapture[capturePointKey]['startedBy'] !== team) {
 							console.log("us " + team + " have more people, restart capture timer on our side");
 							clearCaptureTimer();
 							startCaptureTimer();
 						} //assume we only have 2 teams
 						else {
-							console.log("we don't have enough people yet");
+							console.log("we don't have enough people yet to overtake the timer?");
 						}
 					} else {
 						console.log("no previous timer in progress, start capture timer")
+						underCapture[capturePointKey]['startedBy'] = team;
+						console.log("capture request started by team: ", team);
 						startCaptureTimer();
 					}
 
