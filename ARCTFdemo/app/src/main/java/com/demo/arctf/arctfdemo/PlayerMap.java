@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -47,7 +48,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         OnConnectionFailedListener, LocationListener, OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     // Capture Range in Meters
-    public static final float CAPTURE_RANGE = 10;
+    public static final float CAPTURE_RANGE = 50;
     public static final String TAG = PlayerMap.class.getSimpleName();
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private GoogleMap mMap;
@@ -382,7 +383,8 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         playerLocation.setLongitude(mLastLocation.longitude);
 
         float distanceInMeters = playerLocation.distanceTo(captureLocation);
-        if(distanceInMeters < CAPTURE_RANGE)
+        Log.d("debug", "Distance from point: " + distanceInMeters);
+        if(distanceInMeters <= CAPTURE_RANGE)
         {
             return true;
         }
@@ -403,6 +405,11 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
                         // Send the capture message
                         Log.d("MarkerCapture", "Capturing point in On Marker Click");
                         networkHandler.capturePoint(username, capturePoints.get(marker).getName(), pointLatLng);
+                    }
+                    else
+                    {
+                        Toast.makeText(getActivity().getApplicationContext(),
+                                "Too far for capture", Toast.LENGTH_LONG).show();
                     }
             }
             else
