@@ -61,4 +61,8 @@ public class MapFragConnector extends Fragment {
     {
         mapFragment.updateGameState(capturePointList);
     }
+
+    public boolean inCaptureRange(LatLng pointLocation){
+        return mapFragment.inCaptureRange(pointLocation);
+    }
 }

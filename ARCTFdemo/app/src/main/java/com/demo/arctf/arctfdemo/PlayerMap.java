@@ -46,6 +46,8 @@ import static com.google.android.gms.common.api.GoogleApiClient.*;
 public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment implements ConnectionCallbacks,
         OnConnectionFailedListener, LocationListener, OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
+    // Capture Range in Meters
+    public static final float CAPTURE_RANGE = 10;
     public static final String TAG = PlayerMap.class.getSimpleName();
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private GoogleMap mMap;
@@ -132,8 +134,16 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
          if (playerLocation != null) {
              playerLocation.remove();
          }
+        BitmapDescriptor icon;
+        if(team != null)
+        {
+            icon = getMarkerIcon(team,false);
+        }
+        else{
+            icon = getMarkerIcon(CapturePoint.State.BLUE, false);
+        }
          playerLocation = mMap.addMarker(new MarkerOptions().position(newLoc)
-                 .icon(BitmapDescriptorFactory.fromResource(R.mipmap.player_orange_you)).title(username));
+                 .icon(icon).title(username));
          //mMap.moveCamera(CameraUpdateFactory.newLatLng(newLoc));
         }
     }
@@ -147,8 +157,16 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         if(mMap != null) {
             if(playerLocation!=null)
                 playerLocation.remove();
+            BitmapDescriptor icon;
+            if(team != null)
+            {
+                icon = getMarkerIcon(team,false);
+            }
+            else{
+                icon = getMarkerIcon(CapturePoint.State.BLUE, false);
+            }
             playerLocation = mMap.addMarker(new MarkerOptions().position(newLoc).title(username)
-                    .icon(BitmapDescriptorFactory.fromResource(R.mipmap.player_orange_you)));
+                    .icon(icon));
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newLoc,16));
         }
     }
@@ -353,22 +371,38 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     {
         networkHandler = handler;
     }
+
+    public boolean inCaptureRange(LatLng captureLatLng){
+        Location captureLocation = new Location("");
+        captureLocation.setLatitude(captureLatLng.latitude);
+        captureLocation.setLongitude(captureLatLng.longitude);
+
+        Location playerLocation = new Location("");
+        playerLocation.setLatitude(mLastLocation.latitude);
+        playerLocation.setLongitude(mLastLocation.longitude);
+
+        float distanceInMeters = playerLocation.distanceTo(captureLocation);
+        if(distanceInMeters < CAPTURE_RANGE)
+        {
+            return true;
+        }
+        return false;
+    }
     public boolean onMarkerClick(Marker marker) {
 
         Log.d("debug", "On Marker Click Called");
         if(capturePoints.keySet().contains(marker))
         {
             // Send message to server requesting capture
-            //LatLng pointLocation = capturePoints.get(marker).getLocation();
+            LatLng pointLatLng = capturePoints.get(marker).getLocation();
+
             // TODO(david): Calculate distance between points
-            float distance = 30;
-            /*Location.distanceBetween(mLastLocation.latitude, pointLocation.longitude,
-                    mLastLocation.latitude, pointLocation.longitude, distance);*/
+
             if(networkHandler != null) {
-                    if (distance < 50) {
+                    if (inCaptureRange(pointLatLng)) {
                         // Send the capture message
                         Log.d("MarkerCapture", "Capturing point in On Marker Click");
-                        networkHandler.capturePoint(username, capturePoints.get(marker).getName());
+                        networkHandler.capturePoint(username, capturePoints.get(marker).getName(), pointLatLng);
                     }
             }
             else

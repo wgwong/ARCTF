@@ -78,7 +78,31 @@ public class NetworkHandler extends AppCompatActivity {
             }
         }
     }
-    public void capturePoint(String username, String pointName) {
+    public void capturePoint(final String username, final String pointName,
+                             final LatLng captureLocation) {
+
+
+        //TODO: Figure this out
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Log.d("Handler", "Calling Update Server");
+                if(playerMap.inCaptureRange(captureLocation)) {
+                    sendCaptureRequest(username, pointName);
+                    handler.postDelayed(this, 1000);
+                }
+                else {
+                    sendLeavePoint(username, pointName);
+                }
+            }
+        }, 1000);
+
+
+
+    }
+    private void sendCaptureRequest(String username, String pointName)
+    {
         JSONObject jsonObj = new JSONObject();
         Log.d("debug", "INSIDE CAPTURE POINT NETWORK HANDLER");
         try {
@@ -86,6 +110,21 @@ public class NetworkHandler extends AppCompatActivity {
             jsonObj.put("capturePoint", pointName);
             Log.d("debug", "Sending Capture Request Server");
             networkClient.capturePoint(jsonObj);
+        } catch (JSONException ex) {
+            Log.d("debug", "Capture Request Exception");
+            ex.printStackTrace();
+        }
+    }
+
+    private void sendLeavePoint(String username, String pointName)
+    {
+        JSONObject jsonObj = new JSONObject();
+        Log.d("debug", "INSIDE CAPTURE POINT NETWORK HANDLER");
+        try {
+            jsonObj.put("player", username);
+            jsonObj.put("capturePoint", pointName);
+            Log.d("debug", "Sending Capture Request Server");
+            networkClient.leavePoint(jsonObj);
         } catch (JSONException ex) {
             Log.d("debug", "Capture Request Exception");
             ex.printStackTrace();

@@ -369,4 +369,14 @@ public class NetworkClient extends Fragment {
         Log.d("debug", "capture message sent");
     }
 
+    public void leavePoint(JSONObject leavePointMessage) {
+        Log.d("debug", "leave point called");
+        if (mSocket == null) {
+            Log.d("debug", "why is msocket null when updatelocation");
+        }
+
+        mSocket.emit("leavePoint", leavePointMessage);
+        Log.d("debug", "leave message sent");
+    }
+
 }
