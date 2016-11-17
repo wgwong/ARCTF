@@ -48,7 +48,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         OnConnectionFailedListener, LocationListener, OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     // Capture Range in Meters
-    public static final float CAPTURE_RANGE = 50;
+    public static final float CAPTURE_RANGE = 10000;
     public static final String TAG = PlayerMap.class.getSimpleName();
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private GoogleMap mMap;
@@ -308,6 +308,80 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         }
     }
 
+    public BitmapDescriptor getCapturingIcon(CapturePoint.State ownedby, String capturingTeam, Integer timestep)
+    {
+        // TODO(David): finish this function
+        BitmapDescriptor icon = getMarkerIcon(ownedby, true);
+        if(ownedby == CapturePoint.State.NEUTRAL)
+        {
+            if(capturingTeam.equals("red"))
+            {
+                if(timestep == 1)
+                    icon = BitmapDescriptorFactory.fromResource(R.mipmap.neutral_orange_1);
+                else if(timestep == 2)
+                    icon = BitmapDescriptorFactory.fromResource(R.mipmap.neutral_orange_2);
+                else if(timestep == 3)
+                    icon = BitmapDescriptorFactory.fromResource(R.mipmap.neutral_orange_3);
+                else if(timestep == 4)
+                    icon = BitmapDescriptorFactory.fromResource(R.mipmap.neutral_orange_4);
+            }
+            else if(capturingTeam.equals("blue"))
+            {
+                if(timestep == 1)
+                    icon = BitmapDescriptorFactory.fromResource(R.mipmap.neutral_blue_1);
+                else if(timestep == 2)
+                    icon = BitmapDescriptorFactory.fromResource(R.mipmap.neutral_blue_2);
+                else if(timestep == 3)
+                    icon = BitmapDescriptorFactory.fromResource(R.mipmap.neutral_blue_3);
+                else if(timestep == 4)
+                    icon = BitmapDescriptorFactory.fromResource(R.mipmap.neutral_blue_4);
+            }
+        }
+        else if(ownedby == CapturePoint.State.BLUE)
+        {
+            if(capturingTeam.equals("red"))
+            {
+                if(timestep == 1)
+                    icon = BitmapDescriptorFactory.fromResource(R.mipmap.blue_orange_1);
+                else if(timestep == 2)
+                    icon = BitmapDescriptorFactory.fromResource(R.mipmap.blue_orange_2);
+                else if(timestep == 3)
+                    icon = BitmapDescriptorFactory.fromResource(R.mipmap.blue_orange_3);
+                else if(timestep == 4)
+                    icon = BitmapDescriptorFactory.fromResource(R.mipmap.blue_orange_4);
+            }
+        }
+        else if(ownedby == CapturePoint.State.RED)
+        {
+            if(capturingTeam.equals("blue"))
+            {
+                if(timestep == 1)
+                    icon = BitmapDescriptorFactory.fromResource(R.mipmap.orange_blue_1);
+                else if(timestep == 2)
+                    icon = BitmapDescriptorFactory.fromResource(R.mipmap.orange_blue_2);
+                else if(timestep == 3)
+                    icon = BitmapDescriptorFactory.fromResource(R.mipmap.orange_blue_3);
+                else if(timestep == 4)
+                    icon = BitmapDescriptorFactory.fromResource(R.mipmap.orange_blue_4);
+            }
+        }
+
+        return icon;
+    }
+
+    public void updateCaptureStatus(String pointName, String capturingTeam, Integer redCount, Integer blueCount,
+                                    Integer timestep){
+        Marker tempMarker = capturePointMarkers.get(pointName);
+        CapturePoint tempPoint = capturePoints.get(tempMarker);
+        tempMarker.remove();
+        BitmapDescriptor icon = getCapturingIcon(tempPoint.getState(), capturingTeam, timestep);
+        tempMarker = mMap.addMarker(new MarkerOptions().position(tempPoint.getLocation()).
+                icon(icon)
+                .title(tempPoint.getName()));
+        capturePoints.put(tempMarker, tempPoint);
+        capturePointMarkers.put(pointName, tempMarker);
+    }
+
     // Set team of player
     public void setTeam(CapturePoint.State teamColor)
     {
@@ -419,6 +493,8 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
                     if (inCaptureRange(pointLatLng)) {
                         // Send the capture message
                         Log.d("MarkerCapture", "Capturing point in On Marker Click");
+                        Toast.makeText(getActivity().getApplicationContext(),
+                                "Initiating Capture.", Toast.LENGTH_LONG).show();
                         networkHandler.capturePoint(username, capturePoints.get(marker).getName(), pointLatLng);
                     }
                     else
