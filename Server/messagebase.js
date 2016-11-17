@@ -19,6 +19,10 @@ captureData = {};
 */
 
 teams = {};
+/*
+	key = team key
+	val = list of users in that team
+*/
 
 teamScores = {};
 /*
@@ -31,7 +35,8 @@ underCapture = {};
 	key = capture key, unique id for spawnpoint
 	val = {
 		team: {} //key = team name, val = # of people currently capturing it
-		timer: val //time when capture first started
+		startedBy: //val = team that started request
+		startTime: val //time when capture first started
 	}
 */
 
@@ -42,6 +47,13 @@ captureTimers = {};
 		team: {} //key = team name, val = # of people currently capturing it
 		timer: val //time 	
 	}
+*/
+
+captureAssignment = {};
+/*
+	maps player to their current capture assignment
+	key = player id
+	val = capture key
 */
 
 var Messagebase = (function Messagebase() {
@@ -144,9 +156,9 @@ var Messagebase = (function Messagebase() {
 				console.log("first session: capture data: ", captureData); //debug
 				console.log("first sessiion: team scores now: ", teamScores); //debug
 
-				io.emit("gameStatusPopulate", captureData);
-				io.emit("scoreUpdate", teamScores);
-				io.emit("teamUpdate", team);
+				socket.emit("teamPopulate", teamAssignment);
+				socket.emit("gameStatusPopulate", captureData);
+				socket.emit("scoreUpdate", teamScores);
 			});
 
 			socket.on('playerUpdate', function(data) {
@@ -168,22 +180,42 @@ var Messagebase = (function Messagebase() {
 
 				//DEBUG
 				//console.log("emitting: ", userData);
-				io.emit("playerUpdate_confirm", userData);
+				socket.emit("playerUpdate_confirm", userData);
 			});
 
 			socket.on('capture', function(data) {
-				console.log("someone just tried to capture something: ", data);
+				//console.log("\n\nsomeone just tried to capture something: ", data);
+				//console.log("\tunderCapture: ", underCapture);
 
 				capturePointKey = data.capturePoint;
 				player = data.player;
 				team = userData[player]['team'];
 
 
+				if (capturePointKey in underCapture && 'team' in underCapture[capturePointKey] && team in underCapture[capturePointKey]['team'] && underCapture[capturePointKey]['team'][team].has(player)) {
+					//console.log("ignoring request");
+					return;
+				} else {
+					console.log("\n\nsomeone just tried to capture something: ", data);
+					console.log("\tunderCapture: ", underCapture);
+					console.log("checking request");
+					console.log("capturePointKey " + capturePointKey + " in underCapture: ", capturePointKey in underCapture);
+					if (capturePointKey in underCapture) {
+						console.log("'team' in underCapture[capturePointKey]: ", 'team' in underCapture[capturePointKey]);
+						if ('team' in underCapture[capturePointKey]) {
+							console.log("team " + team + " in underCapture[capturePointKey]['team']: ", team in underCapture[capturePointKey]['team']);
+							if (team in underCapture[capturePointKey]['team']) {
+								console.log("player " + player + " in underCapture[capturePointKey]['team'][team]: ", player in underCapture[capturePointKey]['team'][team]);
+							}
+						}
+					}
+				}
+
 				//reject if their team has already captured it and it's not currently under attack by the opposite team
 				if (captureData[capturePointKey]['ownedBy'] === team &&
 					(!capturePointKey in underCapture ||
 						(capturePointKey in underCapture && captureTimers[capturePointKey] === null))) {
-					console.log("team already has it captured!");
+					console.log("team already captured/contesting it!");
 					return;
 				}
 
@@ -193,34 +225,51 @@ var Messagebase = (function Messagebase() {
 				console.log("this is now: ", now); //debug
 				console.log("this is lastcaptured: ", captureData[capturePointKey]['lastCaptured']); //debug
 
-				if (now - captureData[capturePointKey]['lastCaptured'] > /*30000*/ 1000) {
+				if (now - captureData[capturePointKey]['lastCaptured'] > /*30000*/ 100) {
 
 					console.log("capture point ready to be contested!"); //debug
 
 
 					if (!(capturePointKey in underCapture)) {
+						console.log("capture point " + capturePointKey + " not yet in underCapture, initializing underCapture[" + capturePointKey + "]");
 						underCapture[capturePointKey] = {
 							'team': {},
-							'startTime': null
+							'startTime': null,
+							'startedBy': null
 						}
 					}
 
 					if (!(team in underCapture[capturePointKey]['team'])) {
-						underCapture[capturePointKey]['team'][team] = 0;
+						underCapture[capturePointKey]['team'][team] = new Set();
 					}
-					underCapture[capturePointKey]['team'][team] += 1;
+					underCapture[capturePointKey]['team'][team].add(player);
+					console.log("adding player " + player + " to list of players contesting the point");
+					console.log("underCapture[" + capturePointKey + "]['team'][" + team + "] now: ");
+					console.log(underCapture[capturePointKey]['team'][team]);
 
 
-					function capturePoint() {
+					function capturePoint(capturePointKey) {
 						console.log("capturing point: ", capturePointKey);
 						if (captureData[capturePointKey]['ownedBy'] !== null) {
 							teamScores[captureData[capturePointKey]['ownedBy']] -= 1;
 							console.log("someone else had this flag before we took it"); //debug
 						}
-						captureData[capturePointKey]['ownedBy'] = team;
-						captureData[capturePointKey]['lastCaptured'] = new Date();
+						console.log("underCapture: ");
+						console.log(underCapture);
+						console.log("underCapture[" + capturePointKey + "]: ");
+						console.log(underCapture[capturePointKey]);
+						console.log("underCapture[" + capturePointKey + "]['startedBy']: ");
+						console.log(underCapture[capturePointKey]['startedBy']);
 
-						teamScores[userData[player]['team']] += 1;
+						teamScores[underCapture[capturePointKey]['startedBy']] += 1;
+
+						captureData[capturePointKey]['ownedBy'] = underCapture[capturePointKey]['startedBy'];
+						captureData[capturePointKey]['lastCaptured'] = new Date();
+						underCapture[capturePointKey] = {
+							'team': {},
+							'startTime': null,
+							'startedBy': null
+						}
 
 						console.log("capture data now: ", captureData); //debug
 						console.log("team scores now: ", teamScores); //debug
@@ -230,34 +279,48 @@ var Messagebase = (function Messagebase() {
 					}
 
 					//clear previous timer
-					function clearCaptureTimer() {
-						clearTimeout(captureTimers[capturePointKey]);
-						captureTimers[capturePointKey] = null
+					function clearCaptureTimer(capturePointKey) {
+						pointKey = capturePointKey;
+
+						console.log("clearCapture timer called");
+						console.log("\tcalled on setineterval id: ", captureTimers[pointKey]);
+
+						clearTimeout(captureTimers[pointKey]);
+						captureTimers[pointKey] = null
 					}
 
 					//start timer for capture function like overwatch
-					function startCaptureTimer() {
+					function startCaptureTimer(capturePointKey) {
 						captureTime = new Date();
-						underCapture[capturePointKey]['startTime'] = captureTime
+
+						pointUnderCapture = underCapture[capturePointKey];
+						pointKey = capturePointKey;
+
+						pointUnderCapture['startTime'] = captureTime
+
+						console.log("started capture Timer at time: ", captureTime);
+
+
 
 						clientCaptureUpdater = setInterval(function() {
-							io.emit("underCaptureUpdate", capturePointKey, underCapture[capturePointKey]);
+							io.emit("underCaptureUpdate", pointKey, pointUnderCapture);
 						}, 500); //update clients of point under capture every half second
 
+
+
 						captureTimer = setTimeout(function() {
-							underCapture[capturePointKey] = {
-								'team': {},
-								'startTime': null
-							};
 							clearInterval(clientCaptureUpdater);
-							capturePoint(capturePointKey, team); //upon successful timeout of 5 seconds, capture point
+							capturePoint(pointKey); //upon successful timeout of 5 seconds, capture point
 							clearTimeout(captureTimer);
 							captureTimers[capturePointKey] = null;
-						}, 5000);
-						captureTimers[capturePointKey] = captureTimer;
+						}, 30000);
+
+						captureTimers[pointKey] = captureTimer;
+						//console.log("startCapture captureTimer with setInterval id: ", captureTimer);
+						//console.log("\tdouble check for consistency: ", captureTimers[pointKey]);
 					}
 
-					if (underCapture[capturePointKey]['timer'] !== null) {
+					if (captureTimers[capturePointKey] !== null && captureTimers[capturePointKey] !== undefined) {
 						//TODO, helper function to get opposite team
 						oppositeTeam = null
 						if (team === 'red') {
@@ -266,17 +329,33 @@ var Messagebase = (function Messagebase() {
 							oppositeTeam = 'red';
 						}
 
-						if (underCapture[capturePointKey]['team'][team] > underCapture[capturePointKey]['team'][oppositeTeam]) {
+						if (!(oppositeTeam in underCapture[capturePointKey]['team'])) {
+							console.log("oppositeTeam set doesn't exist, creating");
+							underCapture[capturePointKey]['team'][oppositeTeam] = new Set();
+						}
+
+						console.log("our team count capture: ", underCapture[capturePointKey]['team'][team]);
+						console.log("opp team count capture: ", underCapture[capturePointKey]['team'][oppositeTeam]);
+
+						console.log("our team count capture: ", underCapture[capturePointKey]['team'][team].size);
+						console.log("opp team count capture: ", underCapture[capturePointKey]['team'][oppositeTeam].size);
+
+						if (underCapture[capturePointKey]['team'][team].size > underCapture[capturePointKey]['team'][oppositeTeam].size && underCapture[capturePointKey]['startedBy'] !== team) {
 							console.log("us " + team + " have more people, restart capture timer on our side");
-							clearCaptureTimer();
-							startCaptureTimer();
+							clearCaptureTimer(capturePointKey);
+							underCapture[capturePointKey]['startedBy'] = team;
+							startCaptureTimer(capturePointKey);
 						} //assume we only have 2 teams
 						else {
-							console.log("we don't have enough people yet");
+							console.log("we don't have enough people yet to overtake the timer?");
 						}
 					} else {
-						console.log("no previous timer in progress, start capture timer")
-						startCaptureTimer();
+						console.log("no previous timer in progress, start capture timer");
+						underCapture[capturePointKey]['startedBy'] = team;
+						console.log("capture request started by team: ", team);
+						console.log("underCapture: ");
+						console.log(underCapture);
+						startCaptureTimer(capturePointKey);
 					}
 
 				} else {
@@ -290,7 +369,7 @@ var Messagebase = (function Messagebase() {
 			now = new Date();
 			for (pIndex in userData) {
 				playerTimestamp = userData[pIndex]['timestamp'];
-				if (now - playerTimestamp > 30000) { //if last update was more than 30s ago
+				if (now - playerTimestamp > 3000000) { //if last update was more than 30s ago
 					console.log("player disconnected: ", userData[pIndex]); //debug
 					delete userData[pIndex];
 					io.emit("playerShutdown", userData[pIndex]); //emit to everyone that player x has been disconnected
