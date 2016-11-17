@@ -24,10 +24,10 @@ teams = {};
 	val = list of users in that team
 */
 
-teamScores = {};
+teamPoints = {}; //teamScores
 /*
 	key = team key
-	value = int for team score
+	value = integer representing # of captured points the team currently owns
 */
 
 underCapture = {};
@@ -64,6 +64,7 @@ var Messagebase = (function Messagebase() {
 	var COORD_SIZE_CAP = 20;
 
 	that.setUp = function() {
+		/*
 		captureData['a'] = {
 			'ownedBy': null,
 			'coordinates': [42.357836,-71.093371],
@@ -99,12 +100,17 @@ var Messagebase = (function Messagebase() {
 			'ownedBy': null,
 			'coordinates': [42.363231, -71.099789],
 			'lastCaptured': new Date()
+		}*/
+		captureData['a'] = {
+			'ownedBy': null,
+			'coordinates': [42.359048, -71.091650],
+			'lastCaptured': new Date()
 		}
 
 		teams["red"] = {};
 		teams["blue"] = {};
-		teamScores["red"] = 0;
-		teamScores["blue"] = 0;
+		teamPoints["red"] = 0;
+		teamPoints["blue"] = 0;
 	}
 
 	that.setIO = function(IO) {
@@ -154,11 +160,13 @@ var Messagebase = (function Messagebase() {
 				setTimeout(function(){}, 3000);
 
 				console.log("first session: capture data: ", captureData); //debug
-				console.log("first sessiion: team scores now: ", teamScores); //debug
+				console.log("first sessiion: team points now: ", teamPoints); //debug
 
 				socket.emit("teamPopulate", teamAssignment);
 				socket.emit("gameStatusPopulate", captureData);
-				socket.emit("scoreUpdate", teamScores);
+				//socket.emit("scoreUpdate", teamScores);
+				//TODO, change to actual teamScores
+				socket.emit("scoreUpdate", teamPoints);
 			});
 
 			socket.on('playerUpdate', function(data) {
@@ -251,7 +259,7 @@ var Messagebase = (function Messagebase() {
 					function capturePoint(capturePointKey) {
 						console.log("capturing point: ", capturePointKey);
 						if (captureData[capturePointKey]['ownedBy'] !== null) {
-							teamScores[captureData[capturePointKey]['ownedBy']] -= 1;
+							teamPoints[captureData[capturePointKey]['ownedBy']] -= 1;
 							console.log("someone else had this flag before we took it"); //debug
 						}
 						console.log("underCapture: ");
@@ -261,7 +269,7 @@ var Messagebase = (function Messagebase() {
 						console.log("underCapture[" + capturePointKey + "]['startedBy']: ");
 						console.log(underCapture[capturePointKey]['startedBy']);
 
-						teamScores[underCapture[capturePointKey]['startedBy']] += 1;
+						teamPoints[underCapture[capturePointKey]['startedBy']] += 1;
 
 						captureData[capturePointKey]['ownedBy'] = underCapture[capturePointKey]['startedBy'];
 						captureData[capturePointKey]['lastCaptured'] = new Date();
@@ -272,10 +280,11 @@ var Messagebase = (function Messagebase() {
 						}
 
 						console.log("capture data now: ", captureData); //debug
-						console.log("team scores now: ", teamScores); //debug
+						console.log("team scores now: ", teamPoints); //debug
 
-						io.emit("gameStatusUpdate", captureData); //only run this on success
-						io.emit("scoreUpdate", teamScores);
+						io.emit("gameStatusUpdate", [captureData[capturePointKey]]); //only run this on success
+						//io.emit("scoreUpdate", teamScores);
+						io.emit("scoreUpdate", teamPoints);
 					}
 
 					//clear previous timer
@@ -301,9 +310,22 @@ var Messagebase = (function Messagebase() {
 						console.log("started capture Timer at time: ", captureTime);
 
 
+						count = 0.0;
 
 						clientCaptureUpdater = setInterval(function() {
-							io.emit("underCaptureUpdate", pointKey, pointUnderCapture);
+							count += 0.5;
+							console.log(pointUnderCapture);
+
+							if (!('red' in underCapture[capturePointKey]['team'])) {
+								underCapture[capturePointKey]['team']['red'] = new Set();
+							}
+							if (!('blue' in underCapture[capturePointKey]['team'])) {
+								underCapture[capturePointKey]['team']['blue'] = new Set();
+							}
+
+							redCount = pointUnderCapture['team']['red'].size;
+							blueCount = pointUnderCapture['team']['blue'].size;
+							io.emit("underCaptureUpdate", pointKey, pointUnderCapture['startedBy'], redCount, blueCount, count);
 						}, 500); //update clients of point under capture every half second
 
 
@@ -376,6 +398,9 @@ var Messagebase = (function Messagebase() {
 				}
 			}
 		}, 20000);
+
+		gameStartTime = new Date();
+
 
 	}
 
