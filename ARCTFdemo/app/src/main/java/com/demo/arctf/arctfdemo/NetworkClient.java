@@ -341,14 +341,11 @@ public class NetworkClient extends Fragment {
                     Log.d("debug", "receiving capture points");
                     Log.d("JSON", args[0].toString());
                     NetworkHandler networkHandler = (NetworkHandler) getActivity();
-                    JSONObject data = (JSONObject) args[0];
-                    Iterator<String> keys = data.keys();
+                    String pointName = args[0].toString();
+                    JSONObject point = (JSONObject) args[1];
                     ArrayList<CapturePoint> capturePoints = new ArrayList<CapturePoint>();
-                    while( keys.hasNext() ) {
-                        String key = (String)keys.next();
-                        try
+                    try
                         {
-                            JSONObject point = (JSONObject) data.get(key);
                             String owner = point.get("ownedBy").toString();
                             Log.d("debug", "Owned by "+ owner);
                             CapturePoint.State currentState = CapturePoint.State.NEUTRAL;
@@ -359,14 +356,14 @@ public class NetworkClient extends Fragment {
                             JSONArray coordinates = (JSONArray) point.get("coordinates");
                             LatLng latlng = new LatLng((double)coordinates.get(0),(double)coordinates.get(1));
 
-                            CapturePoint pt = new CapturePoint(latlng, key);
+                            CapturePoint pt = new CapturePoint(latlng, pointName);
                             pt.setState(currentState);
                             capturePoints.add(pt);
                         }
                         catch(JSONException ex){
                             ex.printStackTrace();
                         }
-                    }
+
                     // SEND list of points to network handler which has function to update map
                     // TODO(david): call new function to change capture point colors
                     networkHandler.updateGameState(capturePoints);

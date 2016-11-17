@@ -64,7 +64,7 @@ var Messagebase = (function Messagebase() {
 	var COORD_SIZE_CAP = 20;
 
 	that.setUp = function() {
-		/*
+		
 		captureData['a'] = {
 			'ownedBy': null,
 			'coordinates': [42.357836,-71.093371],
@@ -100,12 +100,12 @@ var Messagebase = (function Messagebase() {
 			'ownedBy': null,
 			'coordinates': [42.363231, -71.099789],
 			'lastCaptured': new Date()
-		}*/
-		captureData['a'] = {
+		}
+		/*captureData['a'] = {
 			'ownedBy': null,
 			'coordinates': [42.359048, -71.091650],
 			'lastCaptured': new Date()
-		}
+		}*/
 
 		teams["red"] = {};
 		teams["blue"] = {};
@@ -282,7 +282,7 @@ var Messagebase = (function Messagebase() {
 						console.log("capture data now: ", captureData); //debug
 						console.log("team scores now: ", teamPoints); //debug
 
-						io.emit("gameStatusUpdate", [captureData[capturePointKey]]); //only run this on success
+						io.emit("gameStatusUpdate", capturePointKey, captureData[capturePointKey]); //only run this on success
 						//io.emit("scoreUpdate", teamScores);
 						io.emit("scoreUpdate", teamPoints);
 					}
@@ -335,7 +335,7 @@ var Messagebase = (function Messagebase() {
 							capturePoint(pointKey); //upon successful timeout of 5 seconds, capture point
 							clearTimeout(captureTimer);
 							captureTimers[capturePointKey] = null;
-						}, 30000);
+						}, 5000);
 
 						captureTimers[pointKey] = captureTimer;
 						//console.log("startCapture captureTimer with setInterval id: ", captureTimer);
