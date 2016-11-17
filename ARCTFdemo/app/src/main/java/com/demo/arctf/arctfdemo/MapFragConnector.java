@@ -73,4 +73,9 @@ public class MapFragConnector extends Fragment {
     {
         mapFragment.setTeam(teamColor);
     }
+
+    public void updateCaptureStatus(String pointName, String capturingTeam, Integer redCount, Integer blueCount,
+                                    Integer timestep){
+        mapFragment.updateCaptureStatus(pointName,capturingTeam,redCount,blueCount,timestep);
+    }
 }

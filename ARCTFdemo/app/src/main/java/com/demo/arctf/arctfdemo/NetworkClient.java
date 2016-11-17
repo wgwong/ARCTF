@@ -71,6 +71,7 @@ public class NetworkClient extends Fragment {
         mSocket.on("gameStatusUpdate", updateGameStatus);
         mSocket.on("scoreUpdate", updateScore);
         mSocket.on("teamPopulate", setTeam);
+        mSocket.on("underCaptureUpdate", updateCaptureStatus);
         mSocket.connect();
 
         Log.d("debug", "mf oncreate finish");
@@ -130,6 +131,7 @@ public class NetworkClient extends Fragment {
             });
         }
     };
+
 
     private Emitter.Listener onDisconnect = new Emitter.Listener() {
         @Override
@@ -217,6 +219,27 @@ public class NetworkClient extends Fragment {
             });
         }
     };
+
+    private Emitter.Listener updateCaptureStatus = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d("CaptureUpdate", "UpdateCaptureStatus");
+                    String pointName = args[0].toString();
+                    String startedBy = args[1].toString();
+                    Integer redCount = Integer.parseInt(args[2].toString());
+                    Integer blueCount = Integer.parseInt(args[3].toString());
+                    Double timestep = Double.parseDouble(args[4].toString());
+                    NetworkHandler networkHandler = (NetworkHandler) getActivity();
+                    networkHandler.updateCaptureStatus(pointName, startedBy,redCount,blueCount,timestep);
+
+                }
+            });
+        }
+    };
+
 
     private Emitter.Listener onUpdate = new Emitter.Listener() {
         @Override

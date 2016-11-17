@@ -88,7 +88,7 @@ public class NetworkHandler extends AppCompatActivity {
             @Override
             public void run() {
                 Log.d("Handler", "Calling Update Server");
-                if(playerMap.inCaptureRange(captureLocation) && !playerMap.alreadyCaptured(pointName)) {
+                if(playerMap.inCaptureRange(captureLocation) /*&& !playerMap.alreadyCaptured(pointName)*/) {
                     sendCaptureRequest(username, pointName);
                     handler.postDelayed(this, 1000);
                 }
@@ -157,14 +157,18 @@ public class NetworkHandler extends AppCompatActivity {
         playerMap.updateGameState(capturePointList);
     }
 
-    public void setTeam(String team)
-    {
+    public void setTeam(String team) {
         //TODO: In the future handle other cases by throwing an error
         CapturePoint.State playerTeam;
-        if(team.equals("blue"))
+        if (team.equals("blue"))
             playerTeam = CapturePoint.State.BLUE;
         else
             playerTeam = CapturePoint.State.RED;
         playerMap.setTeam(playerTeam);
+    }
+
+    public void updateCaptureStatus(String pointName, String capturingTeam, Integer redCount, Integer blueCount,
+                                    Double timestep){
+        playerMap.updateCaptureStatus(pointName, capturingTeam, redCount, blueCount, timestep.intValue());
     }
 }
