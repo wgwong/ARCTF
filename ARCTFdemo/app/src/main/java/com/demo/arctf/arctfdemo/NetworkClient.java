@@ -3,6 +3,7 @@ package com.demo.arctf.arctfdemo;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -190,11 +191,25 @@ public class NetworkClient extends Fragment {
                 @Override
                 public void run() {
                     String data = (String) args[0];
-                    NetworkHandler networkHandler = (NetworkHandler) getActivity();
+                    final NetworkHandler networkHandler = (NetworkHandler) getActivity();
                     networkHandler.setTeam(data);
-                    Chronometer chronometer = (Chronometer) networkHandler.findViewById(R.id.Game_Time);
-                    chronometer.setBase(300);
-                    chronometer.start();
+
+                    new CountDownTimer(300000, 1000) {
+
+                        public void onTick(long millisUntilFinished) {
+                            EditText gameTimeText =(EditText) networkHandler.findViewById(R.id.Game_Time);
+                            long secondsLeft = millisUntilFinished/1000;
+                            long minutesLeft = secondsLeft/60;
+                            long secondsRemaining = secondsLeft%60;
+                            if(secondsRemaining <10)
+                                gameTimeText.setText(""+minutesLeft+":0"+secondsRemaining);
+                            else
+                                gameTimeText.setText(""+minutesLeft+":"+secondsRemaining);
+                        }
+
+                        public void onFinish() {
+                        }
+                    }.start();
                 }
             });
         }
@@ -213,7 +228,11 @@ public class NetworkClient extends Fragment {
                     try {
                         Integer redScore = (Integer) data.get(red);
                         Integer blueScore = (Integer) data.get(blue);
-//                        EditText blueScoreText   = (EditText)NetworkHandler.findViewById(R.id.Team_Score);
+                        EditText blueScoreText = (EditText)getActivity().findViewById(R.id.Towers_Controlled);
+                        EditText redScoreText = (EditText)getActivity().findViewById(R.id.Opponent_Towers_Controlled);
+                        blueScoreText.setText(""+blueScore);
+                        redScoreText.setText(""+redScore);
+
                         Toast.makeText(getActivity().getApplicationContext(),
                             "Blue Score: " + blueScore + " Red Score: " + redScore, Toast.LENGTH_LONG).show();
                     }

@@ -37,65 +37,66 @@
         android:layout_alignLeft="@+id/Game_Time"
         android:layout_alignStart="@+id/Game_Time"
         android:layout_marginTop="29dp"
-        android:countDown="true"
         />
 
 
-    <Chronometer
+    <EditText
         android:layout_width="wrap_content"
         android:id="@+id/Game_Time"
         android:layout_marginBottom="21dp"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:inputType="none"
+        />
 
 
     <EditText
         android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:inputType="number"
+        android:inputType="none"
         android:ems="10"
         android:id="@+id/Opponent_Towers_Controlled"
         android:layout_alignTop="@+id/Boost_Time"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:text="2" />
+        android:text="0" />
 
 
     <EditText
         android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:inputType="number"
+        android:inputType="none"
         android:ems="10"
         android:id="@+id/Towers_Controlled"
         android:layout_alignTop="@+id/Boost_Time"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:text="3" />
+        android:text="0" />
 
 
     <EditText
         android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:inputType="number"
+        android:inputType="none"
         android:ems="10"
         android:id="@+id/Team_Score"
         android:layout_below="@+id/Towers_Controlled"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:text="33" />
+        android:text="0" />
 
 
     <EditText
         android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:inputType="number"
+        android:inputType="none"
         android:ems="10"
         android:id="@+id/Opponent_Team_Score"
         android:layout_below="@+id/Opponent_Towers_Controlled"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:text="22" />
+        android:text="0" />
 
 
     <ImageView

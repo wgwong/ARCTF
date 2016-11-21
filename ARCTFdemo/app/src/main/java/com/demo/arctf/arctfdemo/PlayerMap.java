@@ -48,7 +48,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         OnConnectionFailedListener, LocationListener, OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     // Capture Range in Meters
-    public static final float CAPTURE_RANGE = 10000;
+    public static final float CAPTURE_RANGE = 30;
     public static final String TAG = PlayerMap.class.getSimpleName();
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private GoogleMap mMap;
@@ -85,8 +85,8 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
 
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(10 * 1000)        // 10 seconds, in milliseconds
-                .setFastestInterval(1 * 1000);
+                .setInterval(1 * 1000)        // 10 seconds, in milliseconds
+                .setFastestInterval( 500);
     }
 
 
@@ -138,10 +138,10 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         BitmapDescriptor icon;
         if(team != null)
         {
-            icon = getMarkerIcon(team,false);
+            icon = getPlayerIcon(team);
         }
         else{
-            icon = getMarkerIcon(CapturePoint.State.BLUE, false);
+            icon = getPlayerIcon(CapturePoint.State.BLUE);
         }
          playerLocation = mMap.addMarker(new MarkerOptions().position(newLoc)
                  .icon(icon).title(username));
@@ -161,10 +161,10 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
             BitmapDescriptor icon;
             if(team != null)
             {
-                icon = getMarkerIcon(team,false);
+                icon = getPlayerIcon(team);
             }
             else{
-                icon = getMarkerIcon(CapturePoint.State.BLUE, false);
+                icon = getPlayerIcon(CapturePoint.State.BLUE);
             }
             playerLocation = mMap.addMarker(new MarkerOptions().position(newLoc).title(username)
                     .icon(icon));
@@ -172,6 +172,15 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         }
     }
 
+    public BitmapDescriptor getPlayerIcon(CapturePoint.State team)
+    {
+        BitmapDescriptor markerIcon;
+        if (team == CapturePoint.State.BLUE)
+            markerIcon = BitmapDescriptorFactory.fromResource(R.mipmap.player_blue_you);
+        else
+            markerIcon = BitmapDescriptorFactory.fromResource(R.mipmap.player_orange_you);
+        return markerIcon;
+    }
     @Override
     public void onConnectionSuspended(int i) {
         Log.i(TAG, "Location services suspended. Please reconnect.");
