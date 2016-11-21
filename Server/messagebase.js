@@ -49,6 +49,13 @@ captureTimers = {};
 	}
 */
 
+clientCaptureUpdaters = {};
+/*
+	key = capture key, unique id for spawnpoint
+	val = the actual timer
+*/
+
+
 captureAssignment = {};
 /*
 	maps player to their current capture assignment
@@ -291,8 +298,7 @@ var Messagebase = (function Messagebase() {
 					function clearCaptureTimer(capturePointKey) {
 						pointKey = capturePointKey;
 
-						console.log("clearCapture timer called");
-						console.log("\tcalled on setineterval id: ", captureTimers[pointKey]);
+						console.log("\nclearCapture timer called on capturePoint: ", pointKey);
 
 						clearTimeout(captureTimers[pointKey]);
 						captureTimers[pointKey] = null
@@ -302,25 +308,33 @@ var Messagebase = (function Messagebase() {
 					function startCaptureTimer(capturePointKey) {
 						captureTime = new Date();
 
-						pointUnderCapture = underCapture[capturePointKey];
+						
+
+						
 						pointKey = capturePointKey;
+						pointUnderCapture = underCapture[pointKey];
 
 						pointUnderCapture['startTime'] = captureTime
 
-						console.log("started capture Timer at time: ", captureTime);
+						console.log("\nstarting capture timer for capturePoint key: ", capturePointKey)
+						console.log("underCapture (Overall): ", underCapture);
 
+						console.log("pointUnderCapture: ", pointUnderCapture);
 
 						count = 0.0;
 
-						clientCaptureUpdater = setInterval(function() {
+						clientCaptureUpdaters[pointKey] = setInterval(function() {
+
+							console.log("clientCaptureUpdater called on point: " + pointKey + " with count: " + count);
+
 							count += 0.5;
 							console.log(pointUnderCapture);
 
-							if (!('red' in underCapture[capturePointKey]['team'])) {
-								underCapture[capturePointKey]['team']['red'] = new Set();
+							if (!('red' in pointUnderCapture['team'])) {
+								pointUnderCapture['team']['red'] = new Set();
 							}
-							if (!('blue' in underCapture[capturePointKey]['team'])) {
-								underCapture[capturePointKey]['team']['blue'] = new Set();
+							if (!('blue' in pointUnderCapture['team'])) {
+								pointUnderCapture['team']['blue'] = new Set();
 							}
 
 							redCount = pointUnderCapture['team']['red'].size;
@@ -329,15 +343,25 @@ var Messagebase = (function Messagebase() {
 						}, 500); //update clients of point under capture every half second
 
 
-
 						captureTimer = setTimeout(function() {
-							clearInterval(clientCaptureUpdater);
+							console.log("\ncaptureTimer ended for pointKey: ", pointKey);
+							clearInterval(clientCaptureUpdaters[pointKey]);
 							capturePoint(pointKey); //upon successful timeout of 5 seconds, capture point
-							clearTimeout(captureTimer);
-							captureTimers[capturePointKey] = null;
+
+
+							clearCaptureTimer(pointKey);
+
+							/*
+							clearTimeout(this); //is this line necessary?
+							captureTimers[pointKey] = null;
+							*/
+
+							console.log("captureTimer for pointKey " + pointKey + " cleaned");
 						}, 5000);
 
 						captureTimers[pointKey] = captureTimer;
+
+						console.log("list of capture timers now: ", captureTimers);
 						//console.log("startCapture captureTimer with setInterval id: ", captureTimer);
 						//console.log("\tdouble check for consistency: ", captureTimers[pointKey]);
 					}
