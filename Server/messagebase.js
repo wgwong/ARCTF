@@ -49,6 +49,8 @@ captureTimers = {};
 	}
 */
 
+captureTimers2 = {};
+
 clientCaptureUpdaters = {};
 /*
 	key = capture key, unique id for spawnpoint
@@ -229,7 +231,7 @@ var Messagebase = (function Messagebase() {
 				//reject if their team has already captured it and it's not currently under attack by the opposite team
 				if (captureData[capturePointKey]['ownedBy'] === team &&
 					(!capturePointKey in underCapture ||
-						(capturePointKey in underCapture && captureTimers[capturePointKey] === null))) {
+						(capturePointKey in underCapture && captureTimers2[capturePointKey] === null))) {
 					console.log("team already captured/contesting it!");
 					return;
 				}
@@ -300,8 +302,9 @@ var Messagebase = (function Messagebase() {
 
 						console.log("\nclearCapture timer called on capturePoint: ", pointKey);
 
-						clearTimeout(captureTimers[pointKey]);
-						captureTimers[pointKey] = null
+						//clearTimeout(captureTimers[pointKey]);
+						//captureTimers[pointKey] = null
+						delete captureTimers2[pointKey];
 					}
 
 					//start timer for capture function like overwatch
@@ -323,26 +326,13 @@ var Messagebase = (function Messagebase() {
 
 						count = 0.0;
 
-						clientCaptureUpdaters[pointKey] = setInterval(function() {
-
-							console.log("clientCaptureUpdater called on point: " + pointKey + " with count: " + count);
-
-							count += 0.5;
-							console.log(pointUnderCapture);
-
-							if (!('red' in pointUnderCapture['team'])) {
-								pointUnderCapture['team']['red'] = new Set();
-							}
-							if (!('blue' in pointUnderCapture['team'])) {
-								pointUnderCapture['team']['blue'] = new Set();
-							}
-
-							redCount = pointUnderCapture['team']['red'].size;
-							blueCount = pointUnderCapture['team']['blue'].size;
-							io.emit("underCaptureUpdate", pointKey, pointUnderCapture['startedBy'], redCount, blueCount, count);
-						}, 500); //update clients of point under capture every half second
+						clientCaptureUpdaters[pointKey] = count;
 
 
+
+
+
+						/*
 						captureTimer = setTimeout(function() {
 							console.log("\ncaptureTimer ended for pointKey: ", pointKey);
 							clearInterval(clientCaptureUpdaters[pointKey]);
@@ -351,22 +341,19 @@ var Messagebase = (function Messagebase() {
 
 							clearCaptureTimer(pointKey);
 
-							/*
-							clearTimeout(this); //is this line necessary?
-							captureTimers[pointKey] = null;
-							*/
-
 							console.log("captureTimer for pointKey " + pointKey + " cleaned");
 						}, 5000);
+						*/
 
-						captureTimers[pointKey] = captureTimer;
+						//captureTimers[pointKey] = captureTimer;
+						captureTimers2[pointKey] = new Date();
 
-						console.log("list of capture timers now: ", captureTimers);
+						console.log("list of capture timers now: ", captureTimers2);
 						//console.log("startCapture captureTimer with setInterval id: ", captureTimer);
 						//console.log("\tdouble check for consistency: ", captureTimers[pointKey]);
 					}
 
-					if (captureTimers[capturePointKey] !== null && captureTimers[capturePointKey] !== undefined) {
+					if (captureTimers2[capturePointKey] !== null && captureTimers2[capturePointKey] !== undefined) {
 						//TODO, helper function to get opposite team
 						oppositeTeam = null
 						if (team === 'red') {
@@ -422,6 +409,112 @@ var Messagebase = (function Messagebase() {
 				}
 			}
 		}, 20000);
+
+
+		//DUPLICATES
+		function capturePoint(capturePointKey) {
+			console.log("capturing point: ", capturePointKey);
+			if (captureData[capturePointKey]['ownedBy'] !== null) {
+				teamPoints[captureData[capturePointKey]['ownedBy']] -= 1;
+				console.log("someone else had this flag before we took it"); //debug
+			}
+			console.log("underCapture: ");
+			console.log(underCapture);
+			console.log("underCapture[" + capturePointKey + "]: ");
+			console.log(underCapture[capturePointKey]);
+			console.log("underCapture[" + capturePointKey + "]['startedBy']: ");
+			console.log(underCapture[capturePointKey]['startedBy']);
+
+			teamPoints[underCapture[capturePointKey]['startedBy']] += 1;
+
+			captureData[capturePointKey]['ownedBy'] = underCapture[capturePointKey]['startedBy'];
+			captureData[capturePointKey]['lastCaptured'] = new Date();
+			underCapture[capturePointKey] = {
+				'team': {},
+				'startTime': null,
+				'startedBy': null
+			}
+
+			console.log("capture data now: ", captureData); //debug
+			console.log("team scores now: ", teamPoints); //debug
+
+			io.emit("gameStatusUpdate", capturePointKey, captureData[capturePointKey]); //only run this on success
+			//io.emit("scoreUpdate", teamScores);
+			io.emit("scoreUpdate", teamPoints);
+		}
+		function clearCaptureTimer(capturePointKey) {
+			pointKey = capturePointKey;
+
+			console.log("\nclearCapture timer called on capturePoint: ", pointKey);
+
+			//clearTimeout(captureTimers[pointKey]);
+			//captureTimers[pointKey] = null
+			delete captureTimers2[pointKey];
+		}
+
+
+		setInterval(function() {
+			var ccU = clientCaptureUpdaters;
+			for (var pointKey in ccU) {
+				if (clientCaptureUpdaters[pointKey] !== undefined && clientCaptureUpdaters[pointKey] !== null) {
+
+					if (clientCaptureUpdaters[pointKey] > 5.0) {
+						delete clientCaptureUpdaters[pointKey];
+						continue;
+					}
+
+					pointUnderCapture = underCapture[pointKey];
+					count = clientCaptureUpdaters[pointKey];
+
+					console.log("clientCaptureUpdater called on point: " + pointKey + " with count: " + clientCaptureUpdaters[pointKey]);
+
+					clientCaptureUpdaters[pointKey] += 0.5;
+					console.log(pointUnderCapture);
+
+					if (!('red' in pointUnderCapture['team'])) {
+						pointUnderCapture['team']['red'] = new Set();
+					}
+					if (!('blue' in pointUnderCapture['team'])) {
+						pointUnderCapture['team']['blue'] = new Set();
+					}
+
+					redCount = pointUnderCapture['team']['red'].size;
+					blueCount = pointUnderCapture['team']['blue'].size;
+
+					console.log("pointUnderCapture: ", pointUnderCapture);
+
+					if (pointUnderCapture['startedBy'] !== null && pointUnderCapture['startedBy'] !== undefined) {
+						io.emit("underCaptureUpdate", pointKey, pointUnderCapture['startedBy'], redCount, blueCount, count);
+					}
+				}
+			}
+		}, 500); //update clients of point under capture every half second
+
+		setInterval(function() {
+			var cT2 = captureTimers2;
+
+			var nowDate = new Date();
+			var nowTime = nowDate.getTime();
+			var one_day=1000*60*60*24;
+
+			for (var pointKey in cT2) {
+				console.log("\ncaptureTimer checking for pointKey: ", pointKey);
+
+				
+				if (nowTime - cT2[pointKey].getTime() > 5000) { //more than 5 seconds
+					console.log("captureTimer[" + pointKey + "] has more than 5 seconds");
+					capturePoint(pointKey); //upon successful timeout of 5 seconds, capture point
+
+
+					clearCaptureTimer(pointKey);
+					console.log("CLEANED captureTimer for pointKey " + pointKey);
+				} else {
+					console.log("captureTimer[" + pointKey + "] has only than " + (nowTime - cT2[pointKey].getTime()) + " milliseconds");
+				}
+			}
+
+			
+		}, 500);
 
 		gameStartTime = new Date();
 
