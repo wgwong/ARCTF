@@ -36,7 +36,9 @@
         android:layout_below="@+id/map"
         android:layout_alignLeft="@+id/Game_Time"
         android:layout_alignStart="@+id/Game_Time"
-        android:layout_marginTop="29dp" />
+        android:layout_marginTop="29dp"
+        android:countDown="true"
+        />
 
 
     <Chronometer

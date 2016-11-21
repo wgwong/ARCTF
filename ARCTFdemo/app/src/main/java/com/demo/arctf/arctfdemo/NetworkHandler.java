@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -30,6 +31,10 @@ public class NetworkHandler extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         // Sending reference to PlayerMap
         setContentView(R.layout.activity_frame);
+        ImageView img= (ImageView) findViewById(R.id.Tower_Symbol);
+        img.setImageResource(R.mipmap.blue_capture_point);
+        ImageView img2= (ImageView) findViewById(R.id.Opponent_Tower_Symbol);
+        img2.setImageResource(R.mipmap.orange_capture_point);
         uniqueID = UUID.randomUUID().toString();
         connectToServer();
         Log.d("debug", "networkhandler oncreate called");
@@ -81,14 +86,13 @@ public class NetworkHandler extends AppCompatActivity {
     public void capturePoint(final String username, final String pointName,
                              final LatLng captureLocation) {
 
-
         //TODO: Figure this out
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 Log.d("Handler", "Calling Update Server");
-                if(playerMap.inCaptureRange(captureLocation) /*&& !playerMap.alreadyCaptured(pointName)*/) {
+                if(playerMap.inCaptureRange(captureLocation) && !playerMap.alreadyCaptured(pointName)) {
                     sendCaptureRequest(username, pointName);
                     handler.postDelayed(this, 1000);
                 }

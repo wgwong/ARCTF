@@ -8,6 +8,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Chronometer;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.github.nkzawa.emitter.Emitter;
@@ -190,6 +192,9 @@ public class NetworkClient extends Fragment {
                     String data = (String) args[0];
                     NetworkHandler networkHandler = (NetworkHandler) getActivity();
                     networkHandler.setTeam(data);
+                    Chronometer chronometer = (Chronometer) networkHandler.findViewById(R.id.Game_Time);
+                    chronometer.setBase(300);
+                    chronometer.start();
                 }
             });
         }
@@ -208,6 +213,7 @@ public class NetworkClient extends Fragment {
                     try {
                         Integer redScore = (Integer) data.get(red);
                         Integer blueScore = (Integer) data.get(blue);
+//                        EditText blueScoreText   = (EditText)NetworkHandler.findViewById(R.id.Team_Score);
                         Toast.makeText(getActivity().getApplicationContext(),
                             "Blue Score: " + blueScore + " Red Score: " + redScore, Toast.LENGTH_LONG).show();
                     }
