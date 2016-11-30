@@ -71,7 +71,9 @@ public class NetworkClient extends Fragment {
         mSocket.on("session", onEstablishSession);
         mSocket.on("gameStatusPopulate", receiveCapturePoints);
         mSocket.on("wrongPoint", wrongPoint);
-        mSocket.on("scoreUpdate", updateDigCount);
+        mSocket.on("gameStart", gameStart);
+        mSocket.on("win", endWin);
+        //mSocket.on("scoreUpdate", updateDigCount);
         mSocket.connect();
 
         Log.d("debug", "mf oncreate finish");
@@ -211,6 +213,47 @@ public class NetworkClient extends Fragment {
             });
         }
     };
+
+    private Emitter.Listener gameStart = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Integer timeLeft = (Integer) args[0];
+
+                    //TODO: Need to have a start screen - then game start changes the screen
+                    //TODO: Remove start button
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getActivity().getApplicationContext(),
+                                    "Game Start.", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    new CountDownTimer(timeLeft, 1000) {
+
+                    public void onTick(long millisUntilFinished) {
+                    EditText gameTimeText =(EditText) getActivity().findViewById(R.id.Game_Time);
+                    long secondsLeft = millisUntilFinished/1000;
+                    long minutesLeft = secondsLeft/60;
+                    long secondsRemaining = secondsLeft%60;
+                    if(secondsRemaining <10)
+                            gameTimeText.setText(""+minutesLeft+":0"+secondsRemaining);
+                    else
+                        gameTimeText.setText(""+minutesLeft+":"+secondsRemaining);
+                }
+
+                    public void onFinish() {
+                        Toast.makeText(getActivity().getApplicationContext(),
+                                "You've run out of time.", Toast.LENGTH_LONG).show();
+                    }
+                    }.start();
+
+                }
+            });
+        }
+    };
     private Emitter.Listener onEstablishSession = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
@@ -308,5 +351,14 @@ public class NetworkClient extends Fragment {
 
         mSocket.emit("check", pointName, username);
         Log.d("debug", "capture message sent");
+    }
+
+    public void gameStart() {
+        Log.d("debug", "game start");
+        if (mSocket == null) {
+            Log.d("debug", "why is msocket null when updatelocation");
+        }
+
+        mSocket.emit("gameStart");
     }
 }

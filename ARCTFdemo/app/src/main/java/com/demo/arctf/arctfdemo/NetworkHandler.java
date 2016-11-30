@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -41,6 +42,15 @@ public class NetworkHandler extends AppCompatActivity {
         /* TODO(david): Async Calls - call handler after address is received and map is created
             must change id from mac address
          */
+        Button startGameButton = (Button) findViewById(R.id.start_game_button);
+        startGameButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                networkClient.gameStart();
+
+            }
+        });
     }
 
 

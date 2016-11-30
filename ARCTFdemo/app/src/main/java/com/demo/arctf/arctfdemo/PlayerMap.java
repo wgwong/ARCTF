@@ -1,21 +1,11 @@
 package com.demo.arctf.arctfdemo;
 
-import android.app.Fragment;
 import android.content.IntentSender;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Icon;
 import android.location.Location;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -26,7 +16,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -37,10 +26,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Queue;
 import java.util.Random;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.google.android.gms.common.api.GoogleApiClient.*;
 
@@ -48,7 +34,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         OnConnectionFailedListener, LocationListener, OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     // Capture Range in Meters
-    public static final float CAPTURE_RANGE = 30;
+    public static final float CAPTURE_RANGE = 9000;//30;
     public static final String TAG = PlayerMap.class.getSimpleName();
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private GoogleMap mMap;
@@ -56,7 +42,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     private LatLng mLastLocation;
     private String username;
     private HashMap<Marker, String> capturePointMarkers;
-    private HashMap<Marker, String> capturePointColorMarkers;
+    private HashMap<String, Marker> capturePointColorMarkers;
     private ArrayList<CapturePoint> capturePointArray;
 
     private Marker playerLocation;
@@ -72,7 +58,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         SupportMapFragment mapFragment = (SupportMapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
         capturePointMarkers = new HashMap<Marker, String>();
-        capturePointColorMarkers = new HashMap<Marker, String>();
+        capturePointColorMarkers = new HashMap<String, Marker>();
         capturePointArray = new ArrayList<CapturePoint>();
         mapFragment.getMapAsync(this);
         mGoogleApiClient = new Builder(getActivity())
@@ -83,7 +69,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
 
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(3 * 1000)        // 10 seconds, in milliseconds
+                .setInterval(5 * 1000)        // 10 seconds, in milliseconds
                 .setFastestInterval( 1000);
     }
 
@@ -200,8 +186,9 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         Log.d(TAG, "Map is Ready");
         mMap = map;
         mMap.setOnMarkerClickListener(this);
-        if(capturePointArray.isEmpty())
+        if(!capturePointArray.isEmpty())
         {
+            Log.d("debug", "Icon in OnMapReady");
             for (CapturePoint point : capturePointArray) {
                 //capturePointList.add(point);
                 BitmapDescriptor icon;
@@ -217,7 +204,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
                         .title(point.getName()));
                 captureMarkerColor.setVisible(false);
                 capturePointMarkers.put(captureMarker, point.getName());
-                capturePointColorMarkers.put(captureMarkerColor, point.getName());
+                capturePointColorMarkers.put(point.getName(), captureMarkerColor);
 
             }
         }
@@ -262,6 +249,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
             capturePointArray.add(point);
         }
         if (mMap != null) {
+            Log.d("drawIcon", "Drawing Icons in populate.");
             for (CapturePoint point : capturePointList) {
                 //capturePointList.add(point);
                 BitmapDescriptor icon;
@@ -277,7 +265,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
                         .title(point.getName()));
                 captureMarkerColor.setVisible(false);
                 capturePointMarkers.put(captureMarker, point.getName());
-                capturePointMarkers.put(captureMarkerColor, point.getName());
+                capturePointColorMarkers.put(point.getName(), captureMarkerColor);
 
             }
         }
@@ -321,6 +309,9 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
             if(networkHandler != null) {
                     if (inCaptureRange(pointLatLng)) {
                         // Send the capture message
+                        marker.setVisible(false);
+                        String pointName = capturePointMarkers.get(marker);
+                        capturePointColorMarkers.get(pointName).setVisible(true);
                         Toast.makeText(getActivity().getApplicationContext(),
                                 "Digging...", Toast.LENGTH_LONG).show();
                         networkHandler.checkForTreasure(capturePointMarkers.get(marker), username);

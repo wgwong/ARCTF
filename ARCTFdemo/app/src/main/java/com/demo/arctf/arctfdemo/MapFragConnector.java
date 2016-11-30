@@ -36,16 +36,8 @@ public class MapFragConnector extends Fragment {
     {
         mapFragment.setUsername(username);
     }
-    public LatLng getLastKnownLatLng()
-    {
-        return mapFragment.getLastKnownLatLng();
-    }
 
-    public void updateMap(HashMap<String, ArrayList<LatLng>> playerLocations,
-                          HashMap<String,CapturePoint.State> playerTeams)
-    {
-        mapFragment.updateMap(playerLocations, playerTeams);
-    }
+
 
     public void populateCapturePoints(ArrayList<CapturePoint> capturePoints)
     {
@@ -57,25 +49,5 @@ public class MapFragConnector extends Fragment {
         mapFragment.setNetworkHandler(handler);
     }
 
-    public void updateGameState(ArrayList<CapturePoint> capturePointList)
-    {
-        mapFragment.updateGameState(capturePointList);
-    }
 
-    public boolean inCaptureRange(LatLng pointLocation){
-        return mapFragment.inCaptureRange(pointLocation);
-    }
-
-    public boolean alreadyCaptured(String pointName){
-        return mapFragment.alreadyCaptured(pointName);
-    }
-    public void setTeam(CapturePoint.State teamColor)
-    {
-        mapFragment.setTeam(teamColor);
-    }
-
-    public void updateCaptureStatus(String pointName, String capturingTeam, Integer redCount, Integer blueCount,
-                                    Integer timestep){
-        mapFragment.updateCaptureStatus(pointName,capturingTeam,redCount,blueCount,timestep);
-    }
 }

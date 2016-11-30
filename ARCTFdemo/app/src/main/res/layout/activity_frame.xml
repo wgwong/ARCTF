@@ -121,5 +121,14 @@
         android:layout_alignBottom="@+id/Tower_Symbol"
         android:contentDescription="Tower Symbol" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start Game"
+        android:id="@+id/start_game_button"
+        android:layout_alignTop="@+id/Game_Time"
+        android:layout_alignRight="@+id/Opponent_Tower_Symbol"
+        android:layout_alignEnd="@+id/Opponent_Tower_Symbol" />
+
 
 </RelativeLayout>
