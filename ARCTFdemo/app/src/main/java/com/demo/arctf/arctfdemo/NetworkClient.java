@@ -69,12 +69,9 @@ public class NetworkClient extends Fragment {
         mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
         mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
         mSocket.on("session", onEstablishSession);
-        mSocket.on("playerUpdate_confirm", onUpdate);
         mSocket.on("gameStatusPopulate", receiveCapturePoints);
-        mSocket.on("gameStatusUpdate", updateGameStatus);
-        mSocket.on("scoreUpdate", updateScore);
-        mSocket.on("teamPopulate", setTeam);
-        mSocket.on("underCaptureUpdate", updateCaptureStatus);
+        mSocket.on("wrongPoint", wrongPoint);
+        mSocket.on("scoreUpdate", updateDigCount);
         mSocket.connect();
 
         Log.d("debug", "mf oncreate finish");
@@ -102,10 +99,7 @@ public class NetworkClient extends Fragment {
         return inflater.inflate(R.layout.fragment_client, container, false);
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
 
-    }
 
     @Override
     public void onAttach(Context context) {
@@ -171,6 +165,52 @@ public class NetworkClient extends Fragment {
         }
     };
 
+
+    private Emitter.Listener wrongPoint = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    String pointName = (String) args[0];
+                    final String distanceMessage = (String) args[1];
+                    Log.d("debug", "point is: " + pointName.toString());
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getActivity().getApplicationContext(),
+                            "The treasure is " + distanceMessage + ".", Toast.LENGTH_LONG).show();
+
+
+                        }
+                    });
+
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener endWin = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    final String username = (String) args[0];
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getActivity().getApplicationContext(),
+                                    "Congratulations! " + username + " has found the treasure.", Toast.LENGTH_LONG).show();
+
+
+                        }
+                    });
+
+                }
+            });
+        }
+    };
     private Emitter.Listener onEstablishSession = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
@@ -184,136 +224,28 @@ public class NetworkClient extends Fragment {
         }
     };
 
-    private Emitter.Listener setTeam = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    String data = (String) args[0];
-                    final NetworkHandler networkHandler = (NetworkHandler) getActivity();
-                    networkHandler.setTeam(data);
-
-                    new CountDownTimer(300000, 1000) {
-
-                        public void onTick(long millisUntilFinished) {
-                            EditText gameTimeText =(EditText) networkHandler.findViewById(R.id.Game_Time);
-                            long secondsLeft = millisUntilFinished/1000;
-                            long minutesLeft = secondsLeft/60;
-                            long secondsRemaining = secondsLeft%60;
-                            if(secondsRemaining <10)
-                                gameTimeText.setText(""+minutesLeft+":0"+secondsRemaining);
-                            else
-                                gameTimeText.setText(""+minutesLeft+":"+secondsRemaining);
-                        }
-
-                        public void onFinish() {
-                        }
-                    }.start();
-                }
-            });
-        }
-    };
     //TODO(david): update score json
-    private Emitter.Listener updateScore = new Emitter.Listener() {
+    private Emitter.Listener updateDigCount = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d("JSON", args[0].toString());
-                    JSONObject data = (JSONObject) args[0];
-                    String blue = "blue";
-                    String red = "red";
-                    try {
-                        Integer redScore = (Integer) data.get(red);
-                        Integer blueScore = (Integer) data.get(blue);
-                        EditText blueScoreText = (EditText)getActivity().findViewById(R.id.Towers_Controlled);
-                        EditText redScoreText = (EditText)getActivity().findViewById(R.id.Opponent_Towers_Controlled);
-                        blueScoreText.setText(""+blueScore);
-                        redScoreText.setText(""+redScore);
+                    String count = (String) args[0];
+
+                    Integer digsLeft = Integer.parseInt(count);
+                    EditText blueScoreText = (EditText)getActivity().findViewById(R.id.Towers_Controlled);
+                    blueScoreText.setText(""+digsLeft);
 
                         Toast.makeText(getActivity().getApplicationContext(),
-                            "Blue Score: " + blueScore + " Red Score: " + redScore, Toast.LENGTH_LONG).show();
-                    }
-                    catch(JSONException ex){
-                        ex.printStackTrace();
-                    }
-
-                }
-            });
-        }
-    };
-
-    private Emitter.Listener updateCaptureStatus = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Log.d("CaptureUpdate", "UpdateCaptureStatus");
-                    String pointName = args[0].toString();
-                    String startedBy = args[1].toString();
-                    Integer redCount = Integer.parseInt(args[2].toString());
-                    Integer blueCount = Integer.parseInt(args[3].toString());
-                    Double timestep = Double.parseDouble(args[4].toString());
-                    NetworkHandler networkHandler = (NetworkHandler) getActivity();
-                    networkHandler.updateCaptureStatus(pointName, startedBy,redCount,blueCount,timestep);
-
+                            "You have " + digsLeft + " digs left.", Toast.LENGTH_LONG).show();
                 }
             });
         }
     };
 
 
-    private Emitter.Listener onUpdate = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Log.d("Update", "RECEIVING PLAYER LOCATIONS");
-                    Log.d("JSON", args[0].toString());
-                    NetworkHandler networkHandler = (NetworkHandler) getActivity();
-                    JSONObject data = (JSONObject) args[0];
-                    Iterator<String> keys = data.keys();
-                    HashMap<String,ArrayList<LatLng>> playerLocations = new HashMap<String, ArrayList<LatLng>>();
-                    HashMap<String,CapturePoint.State> playerTeams = new HashMap<String,CapturePoint.State>();
-                    while( keys.hasNext() ) {
-                        String key = (String)keys.next();
-                        try
-                        {
-                            JSONObject player = (JSONObject) data.get(key);
-                            JSONArray coordinates = (JSONArray) player.get("coordinates");
-                            ArrayList<LatLng> locations = new ArrayList<LatLng>();
-                            // TODO(david): Handle team colors - player.get("team")
-                            String color =(String) player.get("team");
-                            for(int i=0; i < coordinates.length(); i++)
-                            {
-                                JSONArray latlng = (JSONArray) coordinates.get(i);
-                                // TODO(david): Handle null case
-                                //if(latlng.get(0) == null || latlng.get(1) == null)
-                                locations.add(i,new LatLng((double)latlng.get(0),(double)latlng.get(1)) );
-                            }
-                            playerLocations.put(key, locations);
-                            CapturePoint.State team = CapturePoint.State.NEUTRAL;
-                            if(color.equals("blue"))
-                                team = CapturePoint.State.BLUE;
-                            else if(color.equals("red"))
-                                team = CapturePoint.State.RED;
-                            playerTeams.put(key, team);
-                        }
-                        catch(JSONException ex){
-                            ex.printStackTrace();
-                        }
-                    }
-                    networkHandler.updateMap(playerLocations, playerTeams);
-                   // {"undefined":{"name":"test","team":"gray","coordinates":[[42.357999,-71.0933371],
 
-                }
-            });
-        }
-    };
 
     private Emitter.Listener receiveCapturePoints = new Emitter.Listener() {
         @Override
@@ -357,48 +289,6 @@ public class NetworkClient extends Fragment {
         }
     };
 
-    private Emitter.Listener updateGameStatus = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Log.d("debug", "receiving capture points");
-                    Log.d("JSON", args[0].toString());
-                    NetworkHandler networkHandler = (NetworkHandler) getActivity();
-                    String pointName = args[0].toString();
-                    JSONObject point = (JSONObject) args[1];
-                    ArrayList<CapturePoint> capturePoints = new ArrayList<CapturePoint>();
-                    try
-                        {
-                            String owner = point.get("ownedBy").toString();
-                            Log.d("debug", "Owned by "+ owner);
-                            CapturePoint.State currentState = CapturePoint.State.NEUTRAL;
-                            if(owner.equals("blue"))
-                                currentState = CapturePoint.State.BLUE;
-                            else if (owner.equals("red"))
-                                currentState = CapturePoint.State.RED;
-                            JSONArray coordinates = (JSONArray) point.get("coordinates");
-                            LatLng latlng = new LatLng((double)coordinates.get(0),(double)coordinates.get(1));
-
-                            CapturePoint pt = new CapturePoint(latlng, pointName);
-                            pt.setState(currentState);
-                            capturePoints.add(pt);
-                        }
-                        catch(JSONException ex){
-                            ex.printStackTrace();
-                        }
-
-                    // SEND list of points to network handler which has function to update map
-                    // TODO(david): call new function to change capture point colors
-                    networkHandler.updateGameState(capturePoints);
-
-                }
-            });
-        }
-    };
-
-
 
     public void establishSession(String username) {
         Log.d("debug", "establish session called");
@@ -409,33 +299,14 @@ public class NetworkClient extends Fragment {
         Log.d("debug", "establish session: emitted message");
     }
 
-    public void updateLocation(JSONObject playerLoc) {
-        Log.d("debug", "update location called");
-        if (mSocket == null) {
-            Log.d("debug", "why is msocket null when updatelocation");
-        }
-        mSocket.emit("playerUpdate", playerLoc);
-        Log.d("debug", "playerUpdate sent");
-    }
 
-    public void capturePoint(JSONObject captureRequest) {
+    public void checkForTreasure(String pointName, String username) {
         Log.d("debug", "capture point called");
         if (mSocket == null) {
             Log.d("debug", "why is msocket null when updatelocation");
         }
 
-        mSocket.emit("capture", captureRequest);
+        mSocket.emit("check", pointName, username);
         Log.d("debug", "capture message sent");
     }
-
-    public void leavePoint(JSONObject leavePointMessage) {
-        Log.d("debug", "leave point called");
-        if (mSocket == null) {
-            Log.d("debug", "why is msocket null when updatelocation");
-        }
-
-        mSocket.emit("leavePoint", leavePointMessage);
-        Log.d("debug", "leave message sent");
-    }
-
 }
