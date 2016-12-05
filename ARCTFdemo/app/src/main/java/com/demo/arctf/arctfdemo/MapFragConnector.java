@@ -49,5 +49,13 @@ public class MapFragConnector extends Fragment {
         mapFragment.setNetworkHandler(handler);
     }
 
+    public void resetCapturePoints()
+    {
+        mapFragment.resetCapturePoints();
+    }
 
+    public void setPointColor(String name, Integer state)
+    {
+        mapFragment.setPointColor(name, state);
+    }
 }

@@ -31,7 +31,9 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
         <!-- Client-Server functions -->
-       <!-- <activity android:name=".MainActivity" >-->
+       <activity android:name=".MainActivity" >
+           <category android:name="android.intent.category.LAUNCHER" />
+           </activity>
         <activity android:name=".NetworkHandler" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
