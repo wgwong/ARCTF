@@ -1,6 +1,7 @@
 package com.demo.arctf.arctfdemo;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -72,7 +74,8 @@ public class NetworkClient extends Fragment {
         mSocket.on("gameStatusPopulate", receiveCapturePoints);
         mSocket.on("wrongPoint", wrongPoint);
         mSocket.on("gameStart", gameStart);
-        mSocket.on("win", endWin);
+        mSocket.on("win", foundTreasure);
+        mSocket.on("gameOver", endGame);
         //mSocket.on("scoreUpdate", updateDigCount);
         mSocket.connect();
 
@@ -175,8 +178,19 @@ public class NetworkClient extends Fragment {
                 @Override
                 public void run() {
                     String pointName = (String) args[0];
-                    final String distanceMessage = (String) args[1];
-                    Integer state = (Integer) args[2];
+                    //final String distanceMessage = (String) args[1];
+                    Integer state = (Integer) args[1];
+                    // close
+                    String distanceMessage = "unable to detect";
+                    if (state == 4) {
+                        distanceMessage = "really far";
+                    } else if (state == 3) {
+                        distanceMessage = "far";
+                    } else if (state == 2) {
+                        distanceMessage = "close";
+                    } else if (state==1) {
+                        distanceMessage = "nearby";
+                    }
                     Log.d("debug", "point is: " + pointName.toString());
 
                     Toast.makeText(getActivity().getApplicationContext(),
@@ -189,24 +203,52 @@ public class NetworkClient extends Fragment {
         }
     };
 
-    private Emitter.Listener endWin = new Emitter.Listener() {
+    private Emitter.Listener foundTreasure = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    final String username = (String) args[0];
+                    //final String username = (String) args[0];
                     getActivity().runOnUiThread(new Runnable() {
+                        Integer treasureCount = (Integer) args[1];
                         @Override
                         public void run() {
                             Toast.makeText(getActivity().getApplicationContext(),
                                     "Congratulations! Your team has found the treasure. A new treasure has been detected." +
                                             "Find it before the time runs out!", Toast.LENGTH_LONG).show();
+                            EditText scoreText =(EditText) getActivity().findViewById(R.id.Team_Score);
+                            scoreText.setText("" + treasureCount);
                         }
                     });
                     NetworkHandler networkHandler = (NetworkHandler) getActivity();
                     networkHandler.resetCapturePoints();
 
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener endGame = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    //final String username = (String) args[0];
+                    getActivity().runOnUiThread(new Runnable() {
+                        Integer treasureCount = (Integer) args[0];
+
+                        @Override
+                        public void run() {
+                            NetworkHandler networkHandler = (NetworkHandler) getActivity();
+                            networkHandler.resetCapturePoints();
+                            /*Intent intent = new Intent(networkHandler,MainActivity.class);
+                            intent.putExtra("com.demo.arctf.arctfdemo.NetworkHandler.SCORE", treasureCount);*/
+
+                            /*startActivity(intent);*/
+                        }
+                    });
                 }
             });
         }
@@ -222,6 +264,10 @@ public class NetworkClient extends Fragment {
 
                     //TODO: Need to have a start screen - then game start changes the screen
                     //TODO: Remove start button
+                    Button startGameButton = (Button) getActivity().findViewById(R.id.start_game_button);
+                    ViewGroup layout = (ViewGroup) startGameButton.getParent();
+                    if(null!=layout) //for safety only  as you are doing onClick
+                        layout.removeView(startGameButton);
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -244,7 +290,7 @@ public class NetworkClient extends Fragment {
 
                     public void onFinish() {
                         Toast.makeText(getActivity().getApplicationContext(),
-                                "You've run out of time.", Toast.LENGTH_LONG).show();
+                                "Time's up.", Toast.LENGTH_LONG).show();
                     }
                     }.start();
 
