@@ -23,10 +23,34 @@ timeRemaining = null;
 
 gameStarted = false;
 
+gameScore = 0;
+
+gameTimer = null;
+
 var Messagebase = (function Messagebase() {
 	var that = Object.create(Messagebase.prototype);
 
 	var io = null;
+
+	function getTreasureKey() {
+		function getRandomInt(min, max) {
+			return Math.floor(Math.random() * (max - min + 1)) + min;
+		}
+		var captureDataArray = Object.keys(captureData);
+		var treasureIndex = getRandomInt(0, captureDataArray.length-1);
+
+		treasureKey = captureDataArray[treasureIndex];
+
+		console.log("treasure key set to: ", treasureKey); //debug
+	}
+
+	function startGameTimer(timeRemaining) {
+		gameTimer = setTimeout(function() {
+			//game end
+			console.log("game over, final score: ", gameScore); //debug
+			io.emit("gameOver", gameScore);
+		}, timeRemaining);
+	}
 
 	that.setUp = function() {
 		
@@ -72,16 +96,7 @@ var Messagebase = (function Messagebase() {
 			'lastCaptured': new Date()
 		}*/
 
-		function getRandomInt(min, max) {
-			return Math.floor(Math.random() * (max - min + 1)) + min;
-		}
-		captureDataArray = Object.keys(captureData);
-		treasureIndex = getRandomInt(0, captureDataArray.length-1);
-
-		treasureKey = captureDataArray[treasureIndex];
-
-		console.log("treasure key: ", treasureKey);
-
+		getTreasureKey();
 	}
 
 	that.setIO = function(IO) {
@@ -117,7 +132,7 @@ var Messagebase = (function Messagebase() {
 			});
 
 			socket.on('gameStart', function() {
-				var minutesLeft = 15;
+				var minutesLeft = 5./60;
 				var ToSeconds = minutesLeft * 60;
 				var ToMilliseconds = ToSeconds * 1000;
 				timeRemaining = ToMilliseconds;
@@ -126,63 +141,76 @@ var Messagebase = (function Messagebase() {
 
 				console.log("gameStart requested"); //debug
 
+				//start timer, once timer runs out, emit a game over screen for all connected players
+				startGameTimer(timeRemaining);
+
 				io.emit('gameStart', timeRemaining);
 			});
 
 			socket.on('check', function(checkKeyString, playerName) {
-				var checkKey = checkKeyString;
-				var player = playerName;
-				if (checkKey == treasureKey) {
-					console.log("player found key!"); //debug
-					//win
-					io.emit("win", player);
-				} else {
-					//get coordinates from point being checked against and compare the distance and return it
-					var checkCoordinates = captureData[checkKey].coordinates;
-					var treasureCoordinates = captureData[treasureKey].coordinates;
 
-					function getEuclideanDistance(x1, y1, x2, y2) {
-						return Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
-					}
+				if (gameStarted) {
+					var checkKey = checkKeyString;
+					var player = playerName;
+					if (checkKey == treasureKey) {
+						console.log("player " + player + " found key!"); //debug
+						//win & increase score
+						gameScore += 1;
+						io.emit("win", player, gameScore);
+						//reset game, get new treasure key
 
-					function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
-					  var R = 6371; // Radius of the earth in km
-					  var dLat = deg2rad(lat2-lat1);  // deg2rad below
-					  var dLon = deg2rad(lon2-lon1); 
-					  var a = 
-					    Math.sin(dLat/2) * Math.sin(dLat/2) +
-					    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-					    Math.sin(dLon/2) * Math.sin(dLon/2)
-					    ; 
-					  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-					  var d = R * c; // Distance in km
-					  return d;
-					}
+						getTreasureKey();
 
-					function deg2rad(deg) {
-					  return deg * (Math.PI/180)
-					}
-
-					var euclideanDistance = getEuclideanDistance(checkCoordinates[0], checkCoordinates[1], treasureCoordinates[0], treasureCoordinates[1]);
-					euclideanDistance *= 10000;
-					euclideanDistance = getDistanceFromLatLonInKm(checkCoordinates[0], checkCoordinates[1], treasureCoordinates[0], treasureCoordinates[1]);
-					euclideanDistance *= 1000;
-
-					var heatSignal = null;
-
-					console.log("euclideanDistance: ", euclideanDistance);
-
-					if (euclideanDistance > 150) {
-						heatSignal = "really far";
-					} else if (euclideanDistance > 100) {
-						heatSignal = "far";
-					} else if (euclideanDistance > 50) {
-						heatSignal = "close";
 					} else {
-						heatSignal = "nearby";
-					}
+						//get coordinates from point being checked against and compare the distance and return it
+						var checkCoordinates = captureData[checkKey].coordinates;
+						var treasureCoordinates = captureData[treasureKey].coordinates;
 
-					socket.emit("wrongPoint", checkKey, heatSignal);
+						function getEuclideanDistance(x1, y1, x2, y2) {
+							return Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+						}
+
+						function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+						  var R = 6371; // Radius of the earth in km
+						  var dLat = deg2rad(lat2-lat1);  // deg2rad below
+						  var dLon = deg2rad(lon2-lon1); 
+						  var a = 
+						    Math.sin(dLat/2) * Math.sin(dLat/2) +
+						    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+						    Math.sin(dLon/2) * Math.sin(dLon/2)
+						    ; 
+						  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+						  var d = R * c; // Distance in km
+						  return d;
+						}
+
+						function deg2rad(deg) {
+						  return deg * (Math.PI/180)
+						}
+
+						var euclideanDistance = getEuclideanDistance(checkCoordinates[0], checkCoordinates[1], treasureCoordinates[0], treasureCoordinates[1]);
+						euclideanDistance *= 10000;
+						euclideanDistance = getDistanceFromLatLonInKm(checkCoordinates[0], checkCoordinates[1], treasureCoordinates[0], treasureCoordinates[1]);
+						euclideanDistance *= 1000;
+
+						var heatSignal = null;
+
+						console.log("euclideanDistance: ", euclideanDistance);
+
+						if (euclideanDistance > 150) {
+							heatSignal = 4; //"really far";
+						} else if (euclideanDistance > 100) {
+							heatSignal = 3; //"far";
+						} else if (euclideanDistance > 50) {
+							heatSignal = 2; //"close";
+						} else {
+							heatSignal = 1; //"nearby";
+						}
+
+						socket.emit("wrongPoint", checkKey, heatSignal);
+					}
+				} else {
+					console.log("player tried to capture without starting game first"); //debug, should never reach here
 				}
 			});
 
