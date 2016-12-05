@@ -176,19 +176,16 @@ public class NetworkClient extends Fragment {
                 public void run() {
                     String pointName = (String) args[0];
                     final String distanceMessage = (String) args[1];
+                    Integer state = (Integer) args[2];
                     Log.d("debug", "point is: " + pointName.toString());
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(getActivity().getApplicationContext(),
-                            "The treasure is " + distanceMessage + ".", Toast.LENGTH_LONG).show();
 
-
-                        }
-                    });
-
+                    Toast.makeText(getActivity().getApplicationContext(),
+                    "The treasure is " + distanceMessage + ".", Toast.LENGTH_LONG).show();
+                    NetworkHandler networkHandler = (NetworkHandler) getActivity();
+                    networkHandler.setPointColor(pointName,state);
                 }
             });
+
         }
     };
 
@@ -203,11 +200,12 @@ public class NetworkClient extends Fragment {
                         @Override
                         public void run() {
                             Toast.makeText(getActivity().getApplicationContext(),
-                                    "Congratulations! " + username + " has found the treasure.", Toast.LENGTH_LONG).show();
-
-
+                                    "Congratulations! Your team has found the treasure. A new treasure has been detected." +
+                                            "Find it before the time runs out!", Toast.LENGTH_LONG).show();
                         }
                     });
+                    NetworkHandler networkHandler = (NetworkHandler) getActivity();
+                    networkHandler.resetCapturePoints();
 
                 }
             });

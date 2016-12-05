@@ -81,5 +81,13 @@ public class NetworkHandler extends AppCompatActivity {
         playerMap.populateCapturePoints(capturePoints);
     }
 
+    public void resetCapturePoints()
+    {
+        playerMap.resetCapturePoints();
+    }
 
+    public void setPointColor(String name, Integer state)
+    {
+        playerMap.setPointColor(name, state);
+    }
 }

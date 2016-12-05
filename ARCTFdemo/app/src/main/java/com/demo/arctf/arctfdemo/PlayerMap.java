@@ -42,7 +42,11 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     private LatLng mLastLocation;
     private String username;
     private HashMap<Marker, String> capturePointMarkers;
-    private HashMap<String, Marker> capturePointColorMarkers;
+    private HashMap<String, Marker> capturePointNoColorMarkers;
+    private HashMap<String, Marker> capturePointColorMarkers1;
+    private HashMap<String, Marker> capturePointColorMarkers2;
+    private HashMap<String, Marker> capturePointColorMarkers3;
+    private HashMap<String, Marker> capturePointColorMarkers4;
     private ArrayList<CapturePoint> capturePointArray;
 
     private Marker playerLocation;
@@ -58,7 +62,11 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         SupportMapFragment mapFragment = (SupportMapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
         capturePointMarkers = new HashMap<Marker, String>();
-        capturePointColorMarkers = new HashMap<String, Marker>();
+        capturePointNoColorMarkers = new HashMap<String, Marker>();
+        capturePointColorMarkers1 = new HashMap<String, Marker>();
+        capturePointColorMarkers2 = new HashMap<String, Marker>();
+        capturePointColorMarkers3 = new HashMap<String, Marker>();
+        capturePointColorMarkers4 = new HashMap<String, Marker>();
         capturePointArray = new ArrayList<CapturePoint>();
         mapFragment.getMapAsync(this);
         mGoogleApiClient = new Builder(getActivity())
@@ -189,24 +197,44 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         if(!capturePointArray.isEmpty())
         {
             Log.d("debug", "Icon in OnMapReady");
-            for (CapturePoint point : capturePointArray) {
-                //capturePointList.add(point);
-                BitmapDescriptor icon;
-                BitmapDescriptor icon2;
-                CapturePoint.State team = point.getState();
-                icon = BitmapDescriptorFactory.fromResource(R.mipmap.neutral_capture_point);
-                icon2 = BitmapDescriptorFactory.fromResource(R.mipmap.blue_capture_point);
-                Marker captureMarker = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
-                        icon(icon)
-                        .title(point.getName()));
-                Marker captureMarkerColor = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
-                        icon(icon2)
-                        .title(point.getName()));
-                captureMarkerColor.setVisible(false);
-                capturePointMarkers.put(captureMarker, point.getName());
-                capturePointColorMarkers.put(point.getName(), captureMarkerColor);
+            drawCapturePointMarkers(capturePointArray);
+        }
+    }
 
-            }
+    protected void drawCapturePointMarkers(ArrayList<CapturePoint> capturePointList)
+    {
+        for (CapturePoint point : capturePointArray) {
+            //capturePointList.add(point);
+            BitmapDescriptor icon;
+            BitmapDescriptor icon2;
+            CapturePoint.State team = point.getState();
+            icon = BitmapDescriptorFactory.fromResource(R.mipmap.neutral_capture_point);
+            icon2 = BitmapDescriptorFactory.fromResource(R.mipmap.blue_capture_point);
+            Marker captureMarker = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
+                    icon(icon)
+                    .title(point.getName()));
+            Marker captureMarkerColor1 = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
+                    icon(icon2)
+                    .title(point.getName()));
+            Marker captureMarkerColor2 = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
+                    icon(icon2)
+                    .title(point.getName()));
+            Marker captureMarkerColor3 = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
+                    icon(icon2)
+                    .title(point.getName()));
+            Marker captureMarkerColor4 = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
+                    icon(icon2)
+                    .title(point.getName()));
+            captureMarkerColor1.setVisible(false);
+            captureMarkerColor2.setVisible(false);
+            captureMarkerColor3.setVisible(false);
+            captureMarkerColor4.setVisible(false);
+            capturePointMarkers.put(captureMarker, point.getName());
+            capturePointNoColorMarkers.put(point.getName(), captureMarker);
+            capturePointColorMarkers1.put(point.getName(), captureMarkerColor1);
+            capturePointColorMarkers2.put(point.getName(), captureMarkerColor2);
+            capturePointColorMarkers3.put(point.getName(), captureMarkerColor3);
+            capturePointColorMarkers4.put(point.getName(), captureMarkerColor4);
         }
     }
 
@@ -250,24 +278,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         }
         if (mMap != null) {
             Log.d("drawIcon", "Drawing Icons in populate.");
-            for (CapturePoint point : capturePointList) {
-                //capturePointList.add(point);
-                BitmapDescriptor icon;
-                BitmapDescriptor icon2;
-                CapturePoint.State team = point.getState();
-                icon = BitmapDescriptorFactory.fromResource(R.mipmap.neutral_capture_point);
-                icon2 = BitmapDescriptorFactory.fromResource(R.mipmap.blue_capture_point);
-                Marker captureMarker = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
-                        icon(icon)
-                        .title(point.getName()));
-                Marker captureMarkerColor = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
-                        icon(icon2)
-                        .title(point.getName()));
-                captureMarkerColor.setVisible(false);
-                capturePointMarkers.put(captureMarker, point.getName());
-                capturePointColorMarkers.put(point.getName(), captureMarkerColor);
-
-            }
+            drawCapturePointMarkers(capturePointList);
         }
     }
 
@@ -296,6 +307,33 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         return false;
     }
 
+    public void resetCapturePoints(){
+        for(String markerName: capturePointNoColorMarkers.keySet())
+        {
+            capturePointNoColorMarkers.get(markerName).setVisible(true);
+            capturePointColorMarkers1.get(markerName).setVisible(false);
+            capturePointColorMarkers2.get(markerName).setVisible(false);
+            capturePointColorMarkers3.get(markerName).setVisible(false);
+            capturePointColorMarkers4.get(markerName).setVisible(false);
+        }
+    }
+    public void setPointColor(String name, Integer state)
+    {
+        capturePointNoColorMarkers.get(name).setVisible(false);
+        switch(state){
+            case 1: capturePointColorMarkers1.get(name).setVisible(true);
+                    break;
+            case 2: capturePointColorMarkers2.get(name).setVisible(true);
+                break;
+            case 3: capturePointColorMarkers3.get(name).setVisible(true);
+                break;
+            case 4: capturePointColorMarkers4.get(name).setVisible(true);
+                break;
+            default:
+                capturePointNoColorMarkers.get(name).setVisible(true);
+        }
+
+    }
     public boolean onMarkerClick(Marker marker) {
         //TODO(david): IMPORTANT - Multiple clicks should not send a new capture request if it is already going
         Log.d("debug", "On Marker Click Called");
@@ -309,9 +347,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
             if(networkHandler != null) {
                     if (inCaptureRange(pointLatLng)) {
                         // Send the capture message
-                        marker.setVisible(false);
                         String pointName = capturePointMarkers.get(marker);
-                        capturePointColorMarkers.get(pointName).setVisible(true);
                         Toast.makeText(getActivity().getApplicationContext(),
                                 "Digging...", Toast.LENGTH_LONG).show();
                         networkHandler.checkForTreasure(capturePointMarkers.get(marker), username);
