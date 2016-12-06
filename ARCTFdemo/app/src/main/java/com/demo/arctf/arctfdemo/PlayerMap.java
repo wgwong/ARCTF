@@ -207,9 +207,16 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
             //capturePointList.add(point);
             BitmapDescriptor icon;
             BitmapDescriptor icon2;
+            BitmapDescriptor icon3;
+            BitmapDescriptor icon4;
+            BitmapDescriptor icon5;
+
             CapturePoint.State team = point.getState();
             icon = BitmapDescriptorFactory.fromResource(R.mipmap.neutral_capture_point);
-            icon2 = BitmapDescriptorFactory.fromResource(R.mipmap.blue_capture_point);
+            icon2 = BitmapDescriptorFactory.fromResource(R.mipmap.close_treasure);
+            icon3 = BitmapDescriptorFactory.fromResource(R.mipmap.middle_treasure);
+            icon4 = BitmapDescriptorFactory.fromResource(R.mipmap.far_treasure);
+            icon5 = BitmapDescriptorFactory.fromResource(R.mipmap.really_far_treasure);
             Marker captureMarker = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
                     icon(icon)
                     .title(point.getName()));
@@ -217,13 +224,13 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
                     icon(icon2)
                     .title(point.getName()));
             Marker captureMarkerColor2 = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
-                    icon(icon2)
+                    icon(icon3)
                     .title(point.getName()));
             Marker captureMarkerColor3 = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
-                    icon(icon2)
+                    icon(icon4)
                     .title(point.getName()));
             Marker captureMarkerColor4 = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
-                    icon(icon2)
+                    icon(icon5)
                     .title(point.getName()));
             captureMarkerColor1.setVisible(false);
             captureMarkerColor2.setVisible(false);

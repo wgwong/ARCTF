@@ -219,10 +219,13 @@ public class NetworkClient extends Fragment {
                                             "Find it before the time runs out!", Toast.LENGTH_LONG).show();
                             EditText scoreText =(EditText) getActivity().findViewById(R.id.Team_Score);
                             scoreText.setText("" + treasureCount);
+                            NetworkHandler networkHandler = (NetworkHandler) getActivity();
+                            // TODO: get name of point that has treasure
+                            // networkHandler.setPointColor()
+                            networkHandler.resetCapturePoints();
                         }
                     });
-                    NetworkHandler networkHandler = (NetworkHandler) getActivity();
-                    networkHandler.resetCapturePoints();
+
 
                 }
             });
@@ -237,12 +240,14 @@ public class NetworkClient extends Fragment {
                 public void run() {
                     //final String username = (String) args[0];
                     getActivity().runOnUiThread(new Runnable() {
-                        Integer treasureCount = (Integer) args[0];
 
                         @Override
                         public void run() {
+                            Integer treasureCount = (Integer) args[0];
                             NetworkHandler networkHandler = (NetworkHandler) getActivity();
                             networkHandler.resetCapturePoints();
+                            Toast.makeText(getActivity().getApplicationContext(),
+                                    "Your final score is " + treasureCount + " treasure found.", Toast.LENGTH_LONG).show();
                             /*Intent intent = new Intent(networkHandler,MainActivity.class);
                             intent.putExtra("com.demo.arctf.arctfdemo.NetworkHandler.SCORE", treasureCount);*/
 
