@@ -8,11 +8,14 @@
          location permissions for the 'MyLocation' functionality. 
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:name="com.demo.arctf.arctfdemo.ServerConnector"
+        android:icon="@mipmap/neutral_blue_3"
+        android:label="ARCTF"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
@@ -27,8 +30,19 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
+        <!-- Client-Server functions -->
+       <activity android:name=".MainActivity" >
+           <category android:name="android.intent.category.LAUNCHER" />
+           </activity>
+        <activity android:name=".NetworkHandler" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-        <activity
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <!-- Location tracking on Map -->
+       <!-- <activity
             android:name="com.demo.arctf.arctfdemo.PlayerMap"
             android:label="@string/title_activity_player_map">
             <intent-filter>
@@ -36,7 +50,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity> -->
     </application>
 
 </manifest>
