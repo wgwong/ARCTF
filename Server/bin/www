@@ -31,6 +31,7 @@ main.setIO(io); //pass in the server to our app
  * Listen on provided port, on all network interfaces.
  */
 
+<<<<<<< HEAD
 getIp(function (err, ip) {
   if (err) {
     throw err;
@@ -39,6 +40,9 @@ getIp(function (err, ip) {
   server.listen(port, ip);
   console.log("server listening on", ip, ":", port)
 });
+=======
+server.listen(port);
+>>>>>>> parent of 822da0a... pushed timed interval msg
 server.on('error', onError);
 server.on('listening', onListening);
 

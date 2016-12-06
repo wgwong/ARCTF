@@ -34,7 +34,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         OnConnectionFailedListener, LocationListener, OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     // Capture Range in Meters
-    public static final float CAPTURE_RANGE = 9000;//30;
+    public static final float CAPTURE_RANGE = 30;
     public static final String TAG = PlayerMap.class.getSimpleName();
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private GoogleMap mMap;
@@ -53,6 +53,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     private NetworkHandler networkHandler;
     LocationRequest mLocationRequest;
     LocationSettingsRequest.Builder builder;
+    private Boolean connected = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -77,7 +78,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
 
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(5 * 1000)        // 10 seconds, in milliseconds
+                .setInterval(2 * 1000)        // 10 seconds, in milliseconds
                 .setFastestInterval( 1000);
     }
 
@@ -85,36 +86,39 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        Log.i(TAG, "Location services connected.");
-        try {
-            //int permissionCheck = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION);
+        if(!connected) {
+            connected = true;
+            Log.i(TAG, "Location services connected.");
+            try {
+                //int permissionCheck = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION);
 
             /*
             if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
                 //Execute location service call if user has explicitly granted ACCESS_FINE_LOCATION..
             }*/
 
-            Random rn = new Random();
-            int requestCode = rn.nextInt(65535);
+                Random rn = new Random();
+                int requestCode = rn.nextInt(65535);
 
 
-            ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, requestCode);
+                ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, requestCode);
 
-            Location location = LocationServices.FusedLocationApi.getLastLocation(
-                    mGoogleApiClient);
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-            if (location == null) {
-                //LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-                Log.d("debug", "location is null"); //debug
+                Location location = LocationServices.FusedLocationApi.getLastLocation(
+                        mGoogleApiClient);
+                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+                if (location == null) {
+                    //LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+                    Log.d("debug", "location is null"); //debug
+                } else {
+                    Log.d("debug", "location is not null");
+                    Log.d("debug", location.toString());
+                    handleFirstLocation(location);
+                }
+                ;
+            } catch (SecurityException s) {
+                //TODO: Handle Security Exception
+                Log.d("debug", "security exception: " + s.toString());
             }
-            else {
-                Log.d("debug", "location is not null");
-                Log.d("debug", location.toString());
-                handleFirstLocation(location);
-            };
-        } catch (SecurityException s) {
-            //TODO: Handle Security Exception
-            Log.d("debug", "security exception: " + s.toString());
         }
     }
 

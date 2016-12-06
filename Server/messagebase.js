@@ -86,17 +86,19 @@ var Messagebase = (function Messagebase() {
 
 	that.setIO = function(IO) {
 
+<<<<<<< HEAD
 		that.setUp();
 
 		io = IO;
 
+=======
+>>>>>>> parent of 822da0a... pushed timed interval msg
 		//io connection
 		io.on('connection', function(socket){
-			console.log("connection established");
-
 			socket.on('disconnect', function(){
 			});
 
+<<<<<<< HEAD
 			//on initial connection, create player data
 			//then send current state of the game
 			socket.on('session', function(player){
@@ -111,16 +113,36 @@ var Messagebase = (function Messagebase() {
 				if (gameStarted) {
 					console.log("game already started, calling gameStart"); //debug
 					io.emit('gameStart', timeRemaining);
+=======
+			socket.on('chat message', function(msg, from, to, date) {
+				if (Object.keys(messages).indexOf(to) === -1) {
+					messages[to] = {};
+				}
+				if (Object.keys(messages[to]).indexOf(from) === -1) {
+					messages[to][from] = [];
+				}
+				messages[to][from].push([msg, date, false]);
+				if (Object.keys(messages).indexOf(from) === -1) {
+					messages[from] = {};
+				}
+				if (Object.keys(messages[from]).indexOf(to) === -1) {
+					messages[from][to] = [];
+>>>>>>> parent of 822da0a... pushed timed interval msg
 				}
 
 				//setTimeout(function(){}, 3000);
 			});
+<<<<<<< HEAD
 
 			socket.on('gameStart', function() {
 				var minutesLeft = 15;
 				var ToSeconds = minutesLeft * 60;
 				var ToMilliseconds = ToSeconds * 1000;
 				timeRemaining = ToMilliseconds;
+=======
+		});
+	}
+>>>>>>> parent of 822da0a... pushed timed interval msg
 
 				gameStarted = true;
 
