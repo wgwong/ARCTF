@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.github.nkzawa.emitter.Emitter;
@@ -229,7 +230,7 @@ public class NetworkClient extends Fragment {
                             networkHandler.setPointColor(pointName,6);
                             Toast.makeText(getActivity().getApplicationContext(),
                                     "Congratulations! Your team has found the treasure.", Toast.LENGTH_LONG).show();
-                            EditText scoreText =(EditText) getActivity().findViewById(R.id.Team_Score);
+                            EditText scoreText =(EditText) getActivity().findViewById(R.id.team_score);
                             scoreText.setText("" + treasureCount);
 
                             Handler handler = new Handler();
@@ -287,7 +288,7 @@ public class NetworkClient extends Fragment {
 
                     //TODO: Need to have a start screen - then game start changes the screen
                     //TODO: Remove start button
-                    Button startGameButton = (Button) getActivity().findViewById(R.id.start_game_button);
+                    ImageButton startGameButton = (ImageButton) getActivity().findViewById(R.id.start_game_button);
                     ViewGroup layout = (ViewGroup) startGameButton.getParent();
                     if(null!=layout) //for safety only  as you are doing onClick
                         layout.removeView(startGameButton);
@@ -336,25 +337,6 @@ public class NetworkClient extends Fragment {
         }
     };
 
-    //TODO(david): update score json
-    private Emitter.Listener updateDigCount = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    String count = (String) args[0];
-
-                    Integer digsLeft = Integer.parseInt(count);
-                    EditText blueScoreText = (EditText)getActivity().findViewById(R.id.Towers_Controlled);
-                    blueScoreText.setText(""+digsLeft);
-
-                        Toast.makeText(getActivity().getApplicationContext(),
-                            "You have " + digsLeft + " digs left.", Toast.LENGTH_LONG).show();
-                }
-            });
-        }
-    };
 
 
 
