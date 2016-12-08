@@ -318,19 +318,23 @@ var Messagebase = (function Messagebase() {
 			});
 
 			socket.on('gameStart', function() {
-				var minutesLeft = 5;
-				var ToSeconds = minutesLeft * 60;
-				var ToMilliseconds = ToSeconds * 1000;
-				timeRemaining = ToMilliseconds;
+				if (!gameStarted) {
+					var minutesLeft = 8;
+					var ToSeconds = minutesLeft * 60;
+					var ToMilliseconds = ToSeconds * 1000;
+					timeRemaining = ToMilliseconds;
 
-				gameStarted = true;
+					gameStarted = true;
 
-				console.log("gameStart requested"); //debug
+					console.log("gameStart requested"); //debug
 
-				//start timer, once timer runs out, emit a game over screen for all connected players
-				startGameTimer(timeRemaining);
+					//start timer, once timer runs out, emit a game over screen for all connected players
+					startGameTimer(timeRemaining);
 
-				io.emit('gameStart', timeRemaining);
+					io.emit('gameStart', timeRemaining);
+				} else {
+					//emit a message saying game already started
+				}
 			});
 
 			socket.on('check', function(checkKeyString, playerName) {
@@ -352,9 +356,10 @@ var Messagebase = (function Messagebase() {
 						var checkCoordinates = captureData[checkKey].coordinates;
 						var treasureCoordinates = captureData[treasureKey].coordinates;
 
+						/*
 						function getEuclideanDistance(x1, y1, x2, y2) {
 							return Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
-						}
+						}*/
 
 						function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
 						  var R = 6371; // Radius of the earth in km
@@ -374,8 +379,6 @@ var Messagebase = (function Messagebase() {
 						  return deg * (Math.PI/180)
 						}
 
-						var euclideanDistance = getEuclideanDistance(checkCoordinates[0], checkCoordinates[1], treasureCoordinates[0], treasureCoordinates[1]);
-						euclideanDistance *= 10000;
 						euclideanDistance = getDistanceFromLatLonInKm(checkCoordinates[0], checkCoordinates[1], treasureCoordinates[0], treasureCoordinates[1]);
 						euclideanDistance *= 1000;
 
