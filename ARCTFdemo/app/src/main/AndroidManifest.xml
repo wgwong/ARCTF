@@ -14,8 +14,8 @@
     <application
         android:allowBackup="true"
         android:name="com.demo.arctf.arctfdemo.ServerConnector"
-        android:icon="@mipmap/neutral_blue_3"
-        android:label="ARCTF"
+        android:icon="@mipmap/treasure"
+        android:label="Treasure Hunt"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 

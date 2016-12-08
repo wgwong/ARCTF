@@ -34,7 +34,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         OnConnectionFailedListener, LocationListener, OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     // Capture Range in Meters
-    public static final float CAPTURE_RANGE = 30;
+    public static final float CAPTURE_RANGE = 9000;//30;
     public static final String TAG = PlayerMap.class.getSimpleName();
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private GoogleMap mMap;
@@ -47,6 +47,9 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     private HashMap<String, Marker> capturePointColorMarkers2;
     private HashMap<String, Marker> capturePointColorMarkers3;
     private HashMap<String, Marker> capturePointColorMarkers4;
+    private HashMap<String, Marker> capturePointColorMarkers5;
+    private HashMap<String, Marker> capturePointDiggingMarkers;
+    private HashMap<String, Marker> capturePointTreasureMarkers;
     private ArrayList<CapturePoint> capturePointArray;
 
     private Marker playerLocation;
@@ -54,6 +57,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     LocationRequest mLocationRequest;
     LocationSettingsRequest.Builder builder;
     private Boolean connected = false;
+    private Boolean gameStarted = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -68,6 +72,9 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
         capturePointColorMarkers2 = new HashMap<String, Marker>();
         capturePointColorMarkers3 = new HashMap<String, Marker>();
         capturePointColorMarkers4 = new HashMap<String, Marker>();
+        capturePointColorMarkers5 = new HashMap<String, Marker>();
+        capturePointDiggingMarkers = new HashMap<String, Marker>();
+        capturePointTreasureMarkers = new HashMap<String, Marker>();
         capturePointArray = new ArrayList<CapturePoint>();
         mapFragment.getMapAsync(this);
         mGoogleApiClient = new Builder(getActivity())
@@ -86,8 +93,6 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        if(!connected) {
-            connected = true;
             Log.i(TAG, "Location services connected.");
             try {
                 //int permissionCheck = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION);
@@ -112,14 +117,18 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
                 } else {
                     Log.d("debug", "location is not null");
                     Log.d("debug", location.toString());
-                    handleFirstLocation(location);
+                    if(!connected) {
+                        connected = true;
+                        handleFirstLocation(location);
+                    }
+                    else {
+                        handleNewLocation(location);
+                    }
                 }
-                ;
             } catch (SecurityException s) {
                 //TODO: Handle Security Exception
                 Log.d("debug", "security exception: " + s.toString());
             }
-        }
     }
 
     private void handleNewLocation(Location location) {
@@ -159,7 +168,7 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     public BitmapDescriptor getPlayerIcon()
     {
         BitmapDescriptor markerIcon;
-        markerIcon = BitmapDescriptorFactory.fromResource(R.mipmap.player_blue_you);
+        markerIcon = BitmapDescriptorFactory.fromResource(R.mipmap.player);
         return markerIcon;
     }
     @Override
@@ -214,13 +223,19 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
             BitmapDescriptor icon3;
             BitmapDescriptor icon4;
             BitmapDescriptor icon5;
+            BitmapDescriptor icon6;
+            BitmapDescriptor diggingIcon;
+            BitmapDescriptor treasureIcon;
 
             CapturePoint.State team = point.getState();
-            icon = BitmapDescriptorFactory.fromResource(R.mipmap.neutral_capture_point);
-            icon2 = BitmapDescriptorFactory.fromResource(R.mipmap.close_treasure);
-            icon3 = BitmapDescriptorFactory.fromResource(R.mipmap.middle_treasure);
-            icon4 = BitmapDescriptorFactory.fromResource(R.mipmap.far_treasure);
-            icon5 = BitmapDescriptorFactory.fromResource(R.mipmap.really_far_treasure);
+            icon = BitmapDescriptorFactory.fromResource(R.mipmap.not_checked);
+            icon2 = BitmapDescriptorFactory.fromResource(R.mipmap.distance_1);
+            icon3 = BitmapDescriptorFactory.fromResource(R.mipmap.distance_2);
+            icon4 = BitmapDescriptorFactory.fromResource(R.mipmap.distance_3);
+            icon5 = BitmapDescriptorFactory.fromResource(R.mipmap.distance_4);
+            icon6 = BitmapDescriptorFactory.fromResource(R.mipmap.distance_5);
+            diggingIcon = BitmapDescriptorFactory.fromResource(R.mipmap.digging);
+            treasureIcon = BitmapDescriptorFactory.fromResource(R.mipmap.treasure);
             Marker captureMarker = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
                     icon(icon)
                     .title(point.getName()));
@@ -236,16 +251,31 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
             Marker captureMarkerColor4 = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
                     icon(icon5)
                     .title(point.getName()));
+            Marker captureMarkerColor5 = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
+                    icon(icon6)
+                    .title(point.getName()));
+            Marker captureMarkerDigging = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
+                    icon(diggingIcon)
+                    .title(point.getName()));
+            Marker captureMarkerTreasure = mMap.addMarker(new MarkerOptions().position(point.getLocation()).
+                    icon(treasureIcon)
+                    .title(point.getName()));
             captureMarkerColor1.setVisible(false);
             captureMarkerColor2.setVisible(false);
             captureMarkerColor3.setVisible(false);
             captureMarkerColor4.setVisible(false);
+            captureMarkerColor5.setVisible(false);
+            captureMarkerDigging.setVisible(false);
+            captureMarkerTreasure.setVisible(false);
             capturePointMarkers.put(captureMarker, point.getName());
             capturePointNoColorMarkers.put(point.getName(), captureMarker);
             capturePointColorMarkers1.put(point.getName(), captureMarkerColor1);
             capturePointColorMarkers2.put(point.getName(), captureMarkerColor2);
             capturePointColorMarkers3.put(point.getName(), captureMarkerColor3);
             capturePointColorMarkers4.put(point.getName(), captureMarkerColor4);
+            capturePointColorMarkers5.put(point.getName(), captureMarkerColor5);
+            capturePointDiggingMarkers.put(point.getName(), captureMarkerDigging);
+            capturePointTreasureMarkers.put(point.getName(), captureMarkerTreasure);
         }
     }
 
@@ -326,12 +356,24 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
             capturePointColorMarkers2.get(markerName).setVisible(false);
             capturePointColorMarkers3.get(markerName).setVisible(false);
             capturePointColorMarkers4.get(markerName).setVisible(false);
+            capturePointColorMarkers5.get(markerName).setVisible(false);
+            capturePointDiggingMarkers.get(markerName).setVisible(false);
+            capturePointTreasureMarkers.get(markerName).setVisible(false);
+
         }
     }
     public void setPointColor(String name, Integer state)
     {
         capturePointNoColorMarkers.get(name).setVisible(false);
+        capturePointDiggingMarkers.get(name).setVisible(false);
+        capturePointColorMarkers1.get(name).setVisible(false);
+        capturePointColorMarkers2.get(name).setVisible(false);
+        capturePointColorMarkers3.get(name).setVisible(false);
+        capturePointColorMarkers4.get(name).setVisible(false);
+        capturePointColorMarkers5.get(name).setVisible(false);
         switch(state){
+            case 0: capturePointDiggingMarkers.get(name).setVisible(true);
+                break;
             case 1: capturePointColorMarkers1.get(name).setVisible(true);
                     break;
             case 2: capturePointColorMarkers2.get(name).setVisible(true);
@@ -339,6 +381,10 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
             case 3: capturePointColorMarkers3.get(name).setVisible(true);
                 break;
             case 4: capturePointColorMarkers4.get(name).setVisible(true);
+                break;
+            case 5: capturePointColorMarkers5.get(name).setVisible(true);
+                break;
+            case 6: capturePointTreasureMarkers.get(name).setVisible(true);
                 break;
             default:
                 capturePointNoColorMarkers.get(name).setVisible(true);
@@ -348,34 +394,35 @@ public class PlayerMap extends com.google.android.gms.maps.SupportMapFragment im
     public boolean onMarkerClick(Marker marker) {
         //TODO(david): IMPORTANT - Multiple clicks should not send a new capture request if it is already going
         Log.d("debug", "On Marker Click Called");
-        if(capturePointMarkers.keySet().contains(marker))
-        {
-            // Send message to server requesting capture
-            LatLng pointLatLng = marker.getPosition();
+        if(gameStarted) {
+            if (capturePointMarkers.keySet().contains(marker)) {
+                // Send message to server requesting capture
+                LatLng pointLatLng = marker.getPosition();
 
-            // TODO(david): Calculate distance between points
+                // TODO(david): Calculate distance between points
 
-            if(networkHandler != null) {
+                if (networkHandler != null) {
                     if (inCaptureRange(pointLatLng)) {
                         // Send the capture message
                         String pointName = capturePointMarkers.get(marker);
-                        Toast.makeText(getActivity().getApplicationContext(),
-                                "Digging...", Toast.LENGTH_LONG).show();
+                        /*Toast.makeText(getActivity().getApplicationContext(),
+                                "Digging...", Toast.LENGTH_LONG).show();*/
+                        setPointColor(pointName, 0);
                         networkHandler.checkForTreasure(capturePointMarkers.get(marker), username);
-                    }
-                    else
-                    {
+                    } else {
                         Toast.makeText(getActivity().getApplicationContext(),
                                 "Get closer to check this point!", Toast.LENGTH_LONG).show();
                     }
-            }
-            else
-            {
-                throw new NullPointerException("Network Handler is undefined in PlayerMap");
+                } else {
+                    throw new NullPointerException("Network Handler is undefined in PlayerMap");
+                }
             }
         }
         Log.d("debug", "Finish capture");
         return true;
     }
-
+    public void setGameStarted()
+    {
+        gameStarted = true;
+    }
 }

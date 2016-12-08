@@ -58,4 +58,9 @@ public class MapFragConnector extends Fragment {
     {
         mapFragment.setPointColor(name, state);
     }
+
+    public void setGameStarted()
+    {
+        mapFragment.setGameStarted();
+    }
 }

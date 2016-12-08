@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -177,26 +178,35 @@ public class NetworkClient extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    String pointName = (String) args[0];
+                    final String pointName = (String) args[0];
                     //final String distanceMessage = (String) args[1];
-                    Integer state = (Integer) args[1];
+                    final Integer state = (Integer) args[1];
                     // close
                     String distanceMessage = "unable to detect";
-                    if (state == 4) {
+                    if (state == 5) {
                         distanceMessage = "really far";
-                    } else if (state == 3) {
+                    } else if (state == 4) {
                         distanceMessage = "far";
-                    } else if (state == 2) {
+                    } else if (state == 3) {
+                        distanceMessage = "moderately far";
+                    } else if (state==2) {
                         distanceMessage = "close";
-                    } else if (state==1) {
+                    }else if (state==1) {
                         distanceMessage = "nearby";
                     }
+                    final String message = distanceMessage;
                     Log.d("debug", "point is: " + pointName.toString());
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getActivity().getApplicationContext(),
+                                    "The treasure is " + message + ".", Toast.LENGTH_LONG).show();
+                            NetworkHandler networkHandler = (NetworkHandler) getActivity();
+                            networkHandler.setPointColor(pointName,state);
+                        }
+                    }, 1000);
 
-                    Toast.makeText(getActivity().getApplicationContext(),
-                    "The treasure is " + distanceMessage + ".", Toast.LENGTH_LONG).show();
-                    NetworkHandler networkHandler = (NetworkHandler) getActivity();
-                    networkHandler.setPointColor(pointName,state);
                 }
             });
 
@@ -212,17 +222,25 @@ public class NetworkClient extends Fragment {
                     //final String username = (String) args[0];
                     getActivity().runOnUiThread(new Runnable() {
                         Integer treasureCount = (Integer) args[1];
+                        String pointName = (String) args[2];
                         @Override
                         public void run() {
+                            final NetworkHandler networkHandler = (NetworkHandler) getActivity();
+                            networkHandler.setPointColor(pointName,6);
                             Toast.makeText(getActivity().getApplicationContext(),
-                                    "Congratulations! Your team has found the treasure. A new treasure has been detected." +
-                                            "Find it before the time runs out!", Toast.LENGTH_LONG).show();
+                                    "Congratulations! Your team has found the treasure.", Toast.LENGTH_LONG).show();
                             EditText scoreText =(EditText) getActivity().findViewById(R.id.Team_Score);
                             scoreText.setText("" + treasureCount);
-                            NetworkHandler networkHandler = (NetworkHandler) getActivity();
-                            // TODO: get name of point that has treasure
-                            // networkHandler.setPointColor()
-                            networkHandler.resetCapturePoints();
+
+                            Handler handler = new Handler();
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getActivity().getApplicationContext(),
+                                            "A new treasure has been detected. Find it before the time runs out!", Toast.LENGTH_LONG).show();
+                                    networkHandler.resetCapturePoints();
+                                }
+                            }, 1000);
                         }
                     });
 
@@ -280,6 +298,8 @@ public class NetworkClient extends Fragment {
                                     "Game Start.", Toast.LENGTH_LONG).show();
                         }
                     });
+                    NetworkHandler networkHandler = (NetworkHandler) getActivity();
+                    networkHandler.setGameStarted();
                     new CountDownTimer(timeLeft, 1000) {
 
                     public void onTick(long millisUntilFinished) {

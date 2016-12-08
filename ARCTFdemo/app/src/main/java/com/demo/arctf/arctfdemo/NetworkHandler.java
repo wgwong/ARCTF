@@ -90,4 +90,9 @@ public class NetworkHandler extends AppCompatActivity {
     {
         playerMap.setPointColor(name, state);
     }
+
+    public void setGameStarted()
+    {
+        playerMap.setGameStarted();
+    }
 }
