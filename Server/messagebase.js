@@ -98,7 +98,8 @@ var Messagebase = (function Messagebase() {
 			'lastCaptured': new Date()
 		}*/
 
-				captureData['d'] = {
+// Killian
+		/*captureData['d'] = {
 			'ownedBy': null,
 			'coordinates': [42.35967288982897, -71.09133494916446],
 			'lastCaptured': new Date()
@@ -277,7 +278,187 @@ var Messagebase = (function Messagebase() {
 			'coordinates': [42.35802891414787, -71.09069030832025],
 			'lastCaptured': new Date()
 		}
+*/
 
+		captureData['ad'] = {
+			'ownedBy': null,
+			'coordinates': [42.360219268,-71.090563752],
+			'lastCaptured': new Date()
+		}
+
+		captureData['a'] = {
+			'ownedBy': null,
+			'coordinates': [42.359997289,-71.090161421],
+			'lastCaptured': new Date()
+		}
+
+		captureData['b'] = {
+			'ownedBy': null,
+			'coordinates': [42.359672248,-71.090182878],
+			'lastCaptured': new Date()
+		}
+
+		captureData['c'] = {
+			'ownedBy': null,
+			'coordinates': [42.359414592,-71.089936115],
+			'lastCaptured': new Date()
+		}
+
+		captureData['d'] = {
+			'ownedBy': null,
+			'coordinates': [42.360032382,-71.089605689],
+			'lastCaptured': new Date()
+		}
+
+		captureData['e'] = {
+			'ownedBy': null,
+			'coordinates': [42.359497835,-71.089517691],
+			'lastCaptured': new Date()
+		}
+
+		captureData['f'] = {
+			'ownedBy': null,
+			'coordinates': [42.359565222,-71.089088537],
+			'lastCaptured': new Date()
+		}
+
+		captureData['g'] = {
+			'ownedBy': null,
+			'coordinates': [42.359767382,-71.089324572],
+			'lastCaptured': new Date()
+		}
+
+		captureData['h'] = {
+			'ownedBy': null,
+			'coordinates': [42.360040892,-71.089287021],
+			'lastCaptured': new Date()
+		}
+
+		captureData['i'] = {
+			'ownedBy': null,
+			'coordinates': [42.360231160,-71.089710810],
+			'lastCaptured': new Date()
+		}
+
+		captureData['j'] = {
+			'ownedBy': null,
+			'coordinates': [42.360472957,-71.089405038],
+			'lastCaptured': new Date()
+		}
+
+		captureData['k'] = {
+			'ownedBy': null,
+			'coordinates': [42.360108279,-71.088750579],
+			'lastCaptured': new Date()
+		}
+
+		captureData['l'] = {
+			'ownedBy': null,
+			'coordinates': [42.360667186,-71.089045622],
+			'lastCaptured': new Date()
+		}
+
+		captureData['m'] = {
+			'ownedBy': null,
+			'coordinates': [42.360722680,-71.088493087],
+			'lastCaptured': new Date()
+		}
+
+		captureData['n'] = {
+			'ownedBy': null,
+			'coordinates': [42.360445209,-71.088680841],
+			'lastCaptured': new Date()
+		}
+
+		captureData['o'] = {
+			'ownedBy': null,
+			'coordinates': [42.360330257,-71.088240959],
+			'lastCaptured': new Date()
+		}
+
+		captureData['p'] = {
+			'ownedBy': null,
+			'coordinates': [42.360001253,-71.088417985],
+			'lastCaptured': new Date()
+		}
+
+		captureData['q'] = {
+			'ownedBy': null,
+			'coordinates': [42.359898192,-71.087978103],
+			'lastCaptured': new Date()
+		}
+
+		captureData['r'] = {
+			'ownedBy': null,
+			'coordinates': [42.359750944,-71.088371873],
+			'lastCaptured': new Date()
+		}
+
+		captureData['s'] = {
+			'ownedBy': null,
+			'coordinates': [42.359893645,-71.088661551],
+			'lastCaptured': new Date()
+		}
+
+		captureData['t'] = {
+			'ownedBy': null,
+			'coordinates': [42.360242468,-71.090168953],
+			'lastCaptured': new Date()
+		}
+
+		captureData['u'] = {
+			'ownedBy': null,
+			'coordinates': [42.360440663,-71.089857817],
+			'lastCaptured': new Date()
+		}
+
+		captureData['v'] = {
+			'ownedBy': null,
+			'coordinates': [42.359937248,-71.088978052],
+			'lastCaptured': new Date()
+		}
+
+		captureData['w'] = {
+			'ownedBy': null,
+			'coordinates': [42.360282107,-71.088967323],
+			'lastCaptured': new Date()
+		}
+
+		captureData['x'] = {
+			'ownedBy': null,
+			'coordinates': [42.359560675,-71.088736653],
+			'lastCaptured': new Date()
+		}
+
+		captureData['y'] = {
+			'ownedBy': null,
+			'coordinates': [42.359735088,-71.088822484],
+			'lastCaptured': new Date()
+		}
+
+		captureData['z'] = {
+			'ownedBy': null,
+			'coordinates': [42.359727160,-71.088050008],
+			'lastCaptured': new Date()
+		}
+
+		captureData['aa'] = {
+			'ownedBy': null,
+			'coordinates': [42.360309854,-71.088532805],
+			'lastCaptured': new Date()
+		}
+
+		captureData['ab'] = {
+			'ownedBy': null,
+			'coordinates': [42.359691485,-71.089841723],
+			'lastCaptured': new Date()
+		}
+
+		captureData['ac'] = {
+			'ownedBy': null,
+			'coordinates': [42.359937248,-71.090383530],
+			'lastCaptured': new Date()
+		}
 
 
 		
