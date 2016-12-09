@@ -232,7 +232,7 @@ public class NetworkClient extends Fragment {
                                     "Congratulations! Your team has found the treasure.", Toast.LENGTH_LONG).show();
                             EditText scoreText =(EditText) getActivity().findViewById(R.id.team_score);
                             scoreText.setText("" + treasureCount);
-
+                            // pause game here?
                             Handler handler = new Handler();
                             handler.postDelayed(new Runnable() {
                                 @Override
@@ -241,7 +241,7 @@ public class NetworkClient extends Fragment {
                                             "A new treasure has been detected. Find it before the time runs out!", Toast.LENGTH_LONG).show();
                                     networkHandler.resetCapturePoints();
                                 }
-                            }, 1000);
+                            }, 2000);
                         }
                     });
 
