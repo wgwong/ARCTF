@@ -47,6 +47,7 @@ var Messagebase = (function Messagebase() {
 	function startGameTimer(timeRemaining) {
 		gameTimer = setTimeout(function() {
 			//game end
+			gameStarted = false;
 			console.log("game over, final score: ", gameScore); //debug
 			io.emit("gameOver", gameScore);
 		}, timeRemaining);
@@ -277,9 +278,6 @@ var Messagebase = (function Messagebase() {
 			'coordinates': [42.35802891414787, -71.09069030832025],
 			'lastCaptured': new Date()
 		}
-
-
-
 		
 
 		getTreasureKey();
@@ -325,6 +323,7 @@ var Messagebase = (function Messagebase() {
 					timeRemaining = ToMilliseconds;
 
 					gameStarted = true;
+					gameScore = 0; //reset gameScore in case this was invoked on a game restart
 
 					console.log("gameStart requested"); //debug
 
@@ -334,6 +333,7 @@ var Messagebase = (function Messagebase() {
 					io.emit('gameStart', timeRemaining);
 				} else {
 					//emit a message saying game already started
+					console.log("game already started!"); //debug
 				}
 			});
 
@@ -345,8 +345,8 @@ var Messagebase = (function Messagebase() {
 					if (checkKey == treasureKey) {
 						console.log("player " + player + " found key!"); //debug
 						//win & increase score
-						gameScore += 1;
-						io.emit("win", player, gameScore);
+						gameScore += 100;
+						io.emit("win", player, gameScore, treasureKey);
 						//reset game, get new treasure key
 
 						getTreasureKey();
