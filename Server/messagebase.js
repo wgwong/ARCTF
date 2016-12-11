@@ -309,19 +309,19 @@ var Messagebase = (function Messagebase() {
 
 				if (gameStarted) {
 					console.log("game already started, calling gameStart"); //debug
-					io.emit('gameStart', timeRemaining);
+					socket.emit('gameStart', timeRemaining);
 				}
 
 				//setTimeout(function(){}, 3000);
 			});
 
 			socket.on('gameStart', function() {
-				if (!gameStarted) {
-					var minutesLeft = 8;
-					var ToSeconds = minutesLeft * 60;
-					var ToMilliseconds = ToSeconds * 1000;
-					timeRemaining = ToMilliseconds;
+				var minutesLeft = 8;
+				var ToSeconds = minutesLeft * 60;
+				var ToMilliseconds = ToSeconds * 1000;
+				timeRemaining = ToMilliseconds;
 
+				if (!gameStarted) {
 					gameStarted = true;
 					gameScore = 0; //reset gameScore in case this was invoked on a game restart
 
@@ -329,12 +329,9 @@ var Messagebase = (function Messagebase() {
 
 					//start timer, once timer runs out, emit a game over screen for all connected players
 					startGameTimer(timeRemaining);
-
-					io.emit('gameStart', timeRemaining);
-				} else {
-					//emit a message saying game already started
-					console.log("game already started!"); //debug
 				}
+
+				socket.emit('gameStart', timeRemaining);
 			});
 
 			socket.on('check', function(checkKeyString, playerName) {
