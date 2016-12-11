@@ -21,6 +21,8 @@ treasureKey = null;
 
 timeRemaining = null;
 
+startTime = null;
+
 gameStarted = false;
 
 gameScore = 0;
@@ -48,6 +50,7 @@ var Messagebase = (function Messagebase() {
 		gameTimer = setTimeout(function() {
 			//game end
 			gameStarted = false;
+			startTime = null;
 			console.log("game over, final score: ", gameScore); //debug
 			io.emit("gameOver", gameScore);
 		}, timeRemaining);
@@ -490,23 +493,22 @@ var Messagebase = (function Messagebase() {
 
 				console.log("sent capture data");
 
-				if (gameStarted) {
-					console.log("game already started, calling gameStart"); //debug
-					socket.emit('gameStart', timeRemaining);
-				}
-
 				//setTimeout(function(){}, 3000);
 			});
 
 			socket.on('gameStart', function() {
-				var minutesLeft = 8;
-				var ToSeconds = minutesLeft * 60;
-				var ToMilliseconds = ToSeconds * 1000;
-				timeRemaining = ToMilliseconds;
-
 				if (!gameStarted) {
+
+					console.log("game hasn't started yet"); //debug
+
+					var minutesLeft = 8;
+					var ToSeconds = minutesLeft * 60;
+					var ToMilliseconds = ToSeconds * 1000;
+					timeRemaining = ToMilliseconds;
+
 					gameStarted = true;
 					gameScore = 0; //reset gameScore in case this was invoked on a game restart
+					startTime = new Date();
 
 					console.log("gameStart requested"); //debug
 
@@ -514,7 +516,12 @@ var Messagebase = (function Messagebase() {
 					startGameTimer(timeRemaining);
 				}
 
-				socket.emit('gameStart', timeRemaining);
+				console.log("time remaining: ", timeRemaining); //debug
+				curTime = new Date();
+
+				var timeDiff = curTime - startTime;
+
+				socket.emit('gameStart', timeRemaining - timeDiff, gameScore);
 			});
 
 			socket.on('check', function(checkKeyString, playerName) {
